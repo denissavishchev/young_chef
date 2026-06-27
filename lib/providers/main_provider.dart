@@ -61,6 +61,7 @@ class MainProvider with ChangeNotifier {
       }
     } catch (e) {
       log('Gemini error: $e');
+      answer = e.toString();
     } finally {
       isLoading = false;
       notifyListeners();
