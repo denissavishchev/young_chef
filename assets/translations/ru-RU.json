@@ -1,4 +1,16 @@
 {
   "ask": "Спроси",
-  "ingredients": "Ингредиенты"
+  "ingredients": "Ингредиенты",
+  "useOnlyMyIngredients": "Использовать только мои ингредиенты",
+  "caloriesRange": "Диапазон калорий {} - {}",
+  "regularDiet": "Обычная диета",
+  "sportDiet": "Спортивная диета",
+  "timeForCooking": "Время приготовления {} мин",
+  "isVegan": "Веганский",
+  "boy": "Мальчик",
+  "girl": "Девочка",
+  "cookingSkills": "Кулинарные навыки",
+  "allergies": "Аллергии",
+  "notLike": "Не нравится",
+  "back": "Назад"
 }

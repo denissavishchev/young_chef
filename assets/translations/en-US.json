@@ -1,4 +1,16 @@
 {
   "ask": "Ask",
-  "ingredients": "Ingredients"
+  "ingredients": "Ingredients",
+  "useOnlyMyIngredients": "Use only my ingredients",
+  "caloriesRange": "Calories range {} - {}",
+  "regularDiet": "Regular diet",
+  "sportDiet": "Sport diet",
+  "timeForCooking": "Time for cooking {} min",
+  "isVegan": "Vegan",
+  "boy": "Boy",
+  "girl": "Girl",
+  "cookingSkills": "Cooking skills",
+  "allergies": "Allergies",
+  "notLike": "Don't like",
+  "back": "Back"
 }

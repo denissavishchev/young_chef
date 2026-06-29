@@ -5,7 +5,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:young_chef/providers/main_provider.dart';
-
 import 'screens/main_screen.dart';
 
 void main() async {

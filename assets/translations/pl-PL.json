@@ -1,4 +1,17 @@
 {
   "ask": "Zapytaj",
-  "ingredients": "Składniki"
+  "ingredients": "Składniki",
+  "useOnlyMyIngredients": "Użyj tylko moich składników",
+  "caloriesRange": "Zakres kalorii {} - {}",
+  "regularDiet": "Dieta standardowa",
+  "sportDiet": "Dieta sportowa",
+  "timeForCooking": "Czas gotowania {} min",
+  "isVegan": "Wegańskie",
+  "boy": "Chłopiec",
+  "girl": "Dziewczynka",
+  "cookingSkills": "Umiejętności kulinarne",
+  "allergies": "Alergie",
+  "notLike": "Nie lubię",
+  "back": "Wstecz"
+
 }
