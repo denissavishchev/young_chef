@@ -13,10 +13,10 @@ class FlagWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: kDarkWhite),
+        border: Border.all(color: kWhite),
         boxShadow: [
           BoxShadow(
-            color: kDarkWhite,
+            color: kWhite,
             blurRadius: 0.5,
             spreadRadius: 0.5,
           )

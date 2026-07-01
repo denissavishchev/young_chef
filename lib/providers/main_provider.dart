@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/recipe_screen.dart';
 import '../widgets/language.dart';
 
@@ -129,39 +130,82 @@ class MainProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setOnlyUserIngredients(bool? value) {
+  void setOnlyUserIngredients(bool? value) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     onlyUserIngredients = value ?? false;
+    await prefs.setBool('onlyUserIngredients', onlyUserIngredients);
     notifyListeners();
   }
 
-  void setCaloriesRange(RangeValues value) {
+  void setCaloriesRange(RangeValues value) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     caloriesRange = value;
+    await prefs.setDouble('caloriesRangeStart', value.start);
+    await prefs.setDouble('caloriesRangeEnd', value.end);
     notifyListeners();
   }
 
-  void setRegularOrSportDiet(bool? value) {
+  void setRegularOrSportDiet(bool? value) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     isRegularDiet = value ?? false;
+    await prefs.setBool('isRegularDiet', isRegularDiet);
     notifyListeners();
   }
 
-  void setBoyOrGirl(bool? value) {
+  void setBoyOrGirl(bool? value) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     isBoy = value ?? false;
+    await prefs.setBool('isBoy', isBoy);
     notifyListeners();
   }
 
-  void setTimeForCooking(double value) {
+  void setTimeForCooking(double value) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     timeForCooking = value;
+    await prefs.setDouble('timeForCooking', timeForCooking);
     notifyListeners();
   }
 
-  void setCookingSkillLevel(double value) {
+  void setCookingSkillLevel(double value) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     cookingSkillLevel = value;
+    await prefs.setDouble('cookingSkillLevel', cookingSkillLevel);
     notifyListeners();
   }
 
-  void setIsVegan(bool? value) {
-    isVegan = value ?? false;
+  void setAllergies(String value) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('allergies', value);
     notifyListeners();
+  }
+
+  void setNotLikes(String value) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('notLikes', value);
+    notifyListeners();
+  }
+
+  void setIsVegan(bool? value) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    isVegan = value ?? false;
+    prefs.setBool('isVegan', isVegan);
+    notifyListeners();
+  }
+
+  void getValuesFromMemory() async{
+    isLoading = true;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    onlyUserIngredients = prefs.getBool('onlyUserIngredients') ?? true;
+    isBoy = prefs.getBool('isBoy') ?? true;
+    cookingSkillLevel = prefs.getDouble('cookingSkillLevel') ?? 1;
+    allergiesController.text = prefs.getString('allergies') ?? '';
+    notLikeController.text = prefs.getString('notLikes') ?? '';
+    caloriesRange = RangeValues(prefs.getDouble('caloriesRangeStart') ?? 100, prefs.getDouble('caloriesRangeEnd') ?? 1000);
+    isRegularDiet = prefs.getBool('isRegularDiet') ?? true;
+    timeForCooking = prefs.getDouble('timeForCooking') ?? 10;
+    isVegan = prefs.getBool('isVegan') ?? false;
+    notifyListeners();
+    isLoading = false;
   }
 
 }

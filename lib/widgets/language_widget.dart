@@ -35,7 +35,7 @@ class LanguageWidget extends StatelessWidget {
           elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: kGrey.withValues(alpha: 0.2), width: 1),
+            side: BorderSide(color: kDarkBlue.withValues(alpha: 0.2), width: 1),
           ),
           child: FlagWidget(
             country: context.locale.toString() == 'en_US'

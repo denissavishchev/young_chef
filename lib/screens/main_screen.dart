@@ -1,13 +1,26 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:young_chef/screens/settings_screen.dart';
 import '../../providers/main_provider.dart';
 import '../constants.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import '../widgets/language_widget.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+
+  @override
+  void initState() {
+    final data = Provider.of<MainProvider>(context, listen: false);
+    data.getValuesFromMemory();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,37 +39,31 @@ class MainScreen extends StatelessWidget {
                           spacing: 12,
                           children: [
                             Row(
+                              spacing: 8,
                               children: [
                                 data.answer == 'Spróbuj ponownie'
                                 ? Text('Spróbuj ponownie za chwilę.')
                                 : SizedBox.shrink(),
                                 Spacer(),
-                                LanguageWidget(),
+                                GestureDetector(
+                                    onTap: () => Navigator.pushReplacement(context,
+                                        MaterialPageRoute(builder: (context) => const SettingsScreen())),
+                                    child: Icon(Icons.settings, size: 32, color: kDarkBlue,)),
                               ],
                             ),
                             TextFormField(
                               controller: data.questionController,
                               autovalidateMode: AutovalidateMode.onUserInteraction,
                               keyboardType: TextInputType.multiline,
-                              cursorColor: kDarkGrey,
+                              cursorColor: kDarkBlue,
                               decoration: textFieldDecoration.copyWith(
                                   label: Text('ingredients'.tr(),)),
-                              // maxLength: 64,
                               validator: (value){
                                 if(value == null || value.isEmpty) {
                                   return 'thisFieldCannotBeEmpty'.tr();
                                 }
                                 return null;
                               },
-                            ),
-                            Row(
-                              children: [
-                                Text('useOnlyMyIngredients'.tr(), style: kTextStyle,),
-                                Checkbox(
-                                  value: data.onlyUserIngredients,
-                                  onChanged: (v) => data.setOnlyUserIngredients(v),
-                                )
-                              ],
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,17 +96,6 @@ class MainScreen extends StatelessWidget {
                                 Text('regularDiet'.tr(), style: kTextStyle,),
                               ],
                             ),
-                            Row(
-                              spacing: 8,
-                              children: [
-                                Text('girl'.tr(), style: kTextStyle,),
-                                Switch(
-                                  value: data.isBoy,
-                                  onChanged: (v) => data.setBoyOrGirl(v),
-                                ),
-                                Text('boy'.tr(), style: kTextStyle,),
-                              ],
-                            ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -116,22 +112,6 @@ class MainScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'cookingSkills'.tr(args: ['${data.cookingSkillLevel.toInt()}']), style: kTextStyle,
-                                ),
-                                Slider(
-                                  padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-                                  value: data.cookingSkillLevel,
-                                  min: 1,
-                                  max: 5,
-                                  divisions: 5,
-                                  onChanged: (v) => data.setCookingSkillLevel(v),
-                                ),
-                              ],
-                            ),
                             Row(
                               spacing: 8,
                               children: [
@@ -141,22 +121,6 @@ class MainScreen extends StatelessWidget {
                                   onChanged: (v) => data.setIsVegan(v),
                                 ),
                               ],
-                            ),
-                            TextFormField(
-                              controller: data.allergiesController,
-                              autovalidateMode: AutovalidateMode.onUserInteraction,
-                              keyboardType: TextInputType.multiline,
-                              cursorColor: kDarkGrey,
-                              decoration: textFieldDecoration.copyWith(
-                                  label: Text('allergies'.tr(),)),
-                            ),
-                            TextFormField(
-                              controller: data.notLikeController,
-                              autovalidateMode: AutovalidateMode.onUserInteraction,
-                              keyboardType: TextInputType.multiline,
-                              cursorColor: kDarkGrey,
-                              decoration: textFieldDecoration.copyWith(
-                                  label: Text('notLike'.tr(),)),
                             ),
                             ElevatedButton(
                                 onPressed: () => data.getRecipe(context),
@@ -170,9 +134,9 @@ class MainScreen extends StatelessWidget {
                         ? Container(
                       width: size.width,
                       height: size.height,
-                      color: kGrey.withValues(alpha: 0.3),
+                      color: kDarkBlue.withValues(alpha: 0.3),
                       child: const Center(child: SpinKitSpinningLines(
-                        color: kBlue,
+                        color: kDarkBlue,
                         size: 40,
                       ),),
                     ) : const SizedBox.shrink()
