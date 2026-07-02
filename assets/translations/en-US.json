@@ -12,5 +12,7 @@
   "cookingSkills": "Cooking skills",
   "allergies": "Allergies",
   "notLike": "Don't like",
-  "back": "Back"
+  "back": "Back",
+  "holdToSpeak": "Hold to speak",
+  "thisFieldCannotBeEmpty": "This field cannot be empty"
 }

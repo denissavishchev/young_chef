@@ -12,5 +12,7 @@
   "cookingSkills": "Кулинарные навыки",
   "allergies": "Аллергии",
   "notLike": "Не нравится",
-  "back": "Назад"
+  "back": "Назад",
+  "holdToSpeak": "Удерживайте, чтобы говорить",
+  "thisFieldCannotBeEmpty": "Это поле не может быть пустым"
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import '../screens/recipe_screen.dart';
 import '../widgets/language.dart';
 
@@ -11,6 +12,10 @@ class MainProvider with ChangeNotifier {
   TextEditingController questionController = TextEditingController();
   TextEditingController allergiesController = TextEditingController();
   TextEditingController notLikeController = TextEditingController();
+
+  final SpeechToText speech = SpeechToText();
+  bool isListening = false;
+  String baseText = '';
 
   String selectedLanguage = 'English - UK';
 
@@ -206,6 +211,53 @@ class MainProvider with ChangeNotifier {
     isVegan = prefs.getBool('isVegan') ?? false;
     notifyListeners();
     isLoading = false;
+  }
+
+  Future<void> initSpeech() async {
+    bool available = await speech.initialize(
+      onStatus: (status) => debugPrint('Status: $status'),
+      onError: (error) => debugPrint('Błąd: $error'),
+    );
+    if (!available) {
+      debugPrint('Speech recognition niedostępny na tym urządzeniu');
+    }
+    notifyListeners();
+  }
+
+  void startListening() async {
+    baseText = questionController.text;
+
+    if (baseText.isNotEmpty && !baseText.endsWith(' ')) {
+      baseText += ' ';
+    }
+    isListening = true;
+    notifyListeners();
+    await speech.listen(
+      onResult: (result) {
+        questionController.text = baseText + result.recognizedWords;
+        questionController.selection = TextSelection.fromPosition(
+          TextPosition(offset: questionController.text.length),
+        );
+        notifyListeners();
+      },
+      listenOptions: SpeechListenOptions(
+        localeId: 'ru_RU',
+        partialResults: true,
+        cancelOnError: true,
+      ),
+    );
+  }
+
+  void stopListening() async {
+    await speech.stop();
+    isListening = false;
+    notifyListeners();
+    debugPrint('Zapisany tekst: ${questionController.text}');
+  }
+
+  void cleanText() {
+    questionController.clear();
+    notifyListeners();
   }
 
 }

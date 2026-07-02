@@ -12,6 +12,7 @@
   "cookingSkills": "Umiejętności kulinarne",
   "allergies": "Alergie",
   "notLike": "Nie lubię",
-  "back": "Wstecz"
-
+  "back": "Wstecz",
+  "holdToSpeak": "Przytrzymaj, aby mówić",
+  "thisFieldCannotBeEmpty": "To pole nie może być puste"
 }

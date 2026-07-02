@@ -19,6 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     final data = Provider.of<MainProvider>(context, listen: false);
     data.getValuesFromMemory();
+    data.initSpeech();
     super.initState();
   }
 
@@ -49,6 +50,29 @@ class _MainScreenState extends State<MainScreen> {
                                     onTap: () => Navigator.pushReplacement(context,
                                         MaterialPageRoute(builder: (context) => const SettingsScreen())),
                                     child: Icon(Icons.settings, size: 32, color: kDarkBlue,)),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                IconButton(
+                                    onPressed: () => data.cleanText(),
+                                    icon: Icon(Icons.delete, size: 32, color: kOrange,)),
+                                GestureDetector(
+                                  onTapDown: (_) => data.startListening(),
+                                  onTapUp: (_) => data.stopListening(),
+                                  child: Container(
+                                    width: size.width * 0.5,
+                                    height: size.height * 0.1,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: kWhite,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: kDarkBlue, width: 2)
+                                      ),
+                                      child: Text('holdToSpeak'.tr(), style: kTextStyle)
+                                  ),
+                                ),
                               ],
                             ),
                             TextFormField(
