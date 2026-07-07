@@ -1,5 +1,5 @@
 {
-  "ask": "Спроси",
+  "createRecipe": "Создать рецепт",
   "ingredients": "Ингредиенты",
   "useOnlyMyIngredients": "Использовать только мои ингредиенты",
   "caloriesRange": "Диапазон калорий {} - {}",
@@ -13,6 +13,5 @@
   "allergies": "Аллергии",
   "notLike": "Не нравится",
   "back": "Назад",
-  "holdToSpeak": "Удерживайте, чтобы говорить",
   "thisFieldCannotBeEmpty": "Это поле не может быть пустым"
 }

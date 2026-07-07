@@ -17,16 +17,16 @@ final kTextStyle = TextStyle(
 final textFieldDecoration = InputDecoration(
     hintStyle: kTextStyle,
     enabledBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: kDarkBlue)
+        borderSide: BorderSide(color: Colors.transparent)
     ),
     focusedBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: kDarkBlue)
+        borderSide: BorderSide(color: Colors.transparent)
     ),
     focusedErrorBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: kOrange)
+        borderSide: BorderSide(color: Colors.transparent)
     ),
     errorBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: kOrange)
+        borderSide: BorderSide(color: Colors.transparent)
     ),
 );
 

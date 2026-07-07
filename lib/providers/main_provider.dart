@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -215,16 +216,16 @@ class MainProvider with ChangeNotifier {
 
   Future<void> initSpeech() async {
     bool available = await speech.initialize(
-      onStatus: (status) => debugPrint('Status: $status'),
-      onError: (error) => debugPrint('Błąd: $error'),
+      onStatus: (status) => log('Status: $status'),
+      onError: (error) => log('Błąd: $error'),
     );
     if (!available) {
-      debugPrint('Speech recognition niedostępny na tym urządzeniu');
+      log('Speech recognition niedostępny na tym urządzeniu');
     }
     notifyListeners();
   }
 
-  void startListening() async {
+  void startListening(BuildContext context) async {
     baseText = questionController.text;
 
     if (baseText.isNotEmpty && !baseText.endsWith(' ')) {
@@ -241,7 +242,7 @@ class MainProvider with ChangeNotifier {
         notifyListeners();
       },
       listenOptions: SpeechListenOptions(
-        localeId: 'ru_RU',
+        localeId: context.locale.toString(),
         partialResults: true,
         cancelOnError: true,
       ),
@@ -252,12 +253,7 @@ class MainProvider with ChangeNotifier {
     await speech.stop();
     isListening = false;
     notifyListeners();
-    debugPrint('Zapisany tekst: ${questionController.text}');
-  }
-
-  void cleanText() {
-    questionController.clear();
-    notifyListeners();
+    log('Zapisany tekst: ${questionController.text}');
   }
 
 }

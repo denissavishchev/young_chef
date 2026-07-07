@@ -1,5 +1,5 @@
 {
-  "ask": "Zapytaj",
+  "createRecipe": "Utwórz przepis",
   "ingredients": "Składniki",
   "useOnlyMyIngredients": "Użyj tylko moich składników",
   "caloriesRange": "Zakres kalorii {} - {}",
@@ -13,6 +13,5 @@
   "allergies": "Alergie",
   "notLike": "Nie lubię",
   "back": "Wstecz",
-  "holdToSpeak": "Przytrzymaj, aby mówić",
   "thisFieldCannotBeEmpty": "To pole nie może być puste"
 }
