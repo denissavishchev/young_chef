@@ -13,6 +13,12 @@ final kTextStyle = TextStyle(
     fontSize: 24.sp,
 );
 
+final kBigTextStyle = TextStyle(
+    color: kDarkBlue,
+    fontWeight: FontWeight.bold,
+    fontSize: 44.sp,
+);
+
 
 final textFieldDecoration = InputDecoration(
     hintStyle: kTextStyle,

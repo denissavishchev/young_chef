@@ -13,5 +13,10 @@
   "allergies": "Allergies",
   "notLike": "Don't like",
   "back": "Back",
-  "thisFieldCannotBeEmpty": "This field cannot be empty"
+  "thisFieldCannotBeEmpty": "This field cannot be empty",
+  "instructions": "Instructions",
+  "calories": "Calories:",
+  "protein": "Protein:",
+  "carbohydrates": "Carbohydrates:",
+  "fat": "Fat:"
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import '../models/answer_model.dart';
 import '../screens/recipe_screen.dart';
 import '../widgets/language.dart';
 
@@ -21,7 +23,17 @@ class MainProvider with ChangeNotifier {
   String selectedLanguage = 'English - UK';
 
   bool isLoading = false;
-  String answer = '';
+  RecipeResponse answer = RecipeResponse(
+      recipeName: '',
+      ingredients: [],
+      instructions: '',
+      calories: '',
+      protein: '',
+      carbohydrates: '',
+      fat: '',
+      developerInfo: '');
+  
+  String answerError = '';
 
   bool onlyUserIngredients = true;
   RangeValues caloriesRange = const RangeValues(100, 1000);
@@ -45,7 +57,7 @@ class MainProvider with ChangeNotifier {
       Content.multi([
         TextPart(
           '''
-            Jesteś doświadczonym doradcą kulinarnym, który tworzy przepisy specjalnie dla nastolatków.
+          Jesteś doświadczonym doradcą kulinarnym, który tworzy przepisy specjalnie dla nastolatków.
 
             Na podstawie podanych produktów: ${questionController.text}
           
@@ -54,14 +66,14 @@ class MainProvider with ChangeNotifier {
             Dodatkowe parametry, które MUSISZ uwzględnić:
           
             - Źródło składników: ${onlyUserIngredients
-                        ? "Użyj WYŁĄCZNIE podanych produktów. Nie dodawaj żadnych innych składników, łącznie z solą, pieprzem czy oliwą, jeśli nie zostały wymienione."
-                        : "Bazuj przede wszystkim na podanych produktach. Możesz dodać podstawowe składniki uzupełniające typu sól, pieprz, oliwa, przyprawy, jeśli są potrzebne — ale nie dodawaj nowych głównych składników (np. dodatkowego mięsa, nabiału czy warzyw, których nie ma na liście)."}
+              ? "Użyj WYŁĄCZNIE podanych produktów. Nie dodawaj żadnych innych składników, łącznie z solą, pieprzem czy oliwą, jeśli nie zostały wymienione."
+              : "Bazuj przede wszystkim na podanych produktach. Możesz dodać podstawowe składniki uzupełniające typu sól, pieprz, oliwa, przyprawy, jeśli są potrzebne — ale nie dodawaj nowych głównych składników (np. dodatkowego mięsa, nabiału czy warzyw, których nie ma na liście)."}
           
             - Kaloryczność: Całe danie powinno mieścić się w zakresie od ${caloriesRange.start} do ${caloriesRange.end} kcal.
           
             - Typ diety: ${isRegularDiet
-                        ? "Standardowa, zbalansowana dieta nastolatka."
-                        : "Dieta dopasowana do potrzeb młodego sportowca / dnia treningowego — uwzględnij odpowiednią podaż białka i węglowodanów wspierających regenerację i energię."}
+              ? "Standardowa, zbalansowana dieta nastolatka."
+              : "Dieta dopasowana do potrzeb młodego sportowca / dnia treningowego — uwzględnij odpowiednią podaż białka i węglowodanów wspierających regenerację i energię."}
           
             - Płeć osoby, dla której przygotowywany jest przepis: ${isBoy ? "chłopak" : "dziewczynka"} (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie).
           
@@ -81,27 +93,33 @@ class MainProvider with ChangeNotifier {
             - Jest łatwy do przygotowania w podanym limicie czasu, przy użyciu podstawowych narzędzi kuchennych
             - Jest zdrowy (zbalansowany, bez nadmiaru cukru, soli i tłuszczu)
             - Spełnia wszystkie powyższe parametry (źródło składników, kaloryczność, typ diety, dieta wegańska, niechciane składniki, alergie)
+            
+            Odpowiedz WYŁĄCZNIE w formacie czystego JSON (bez markdown, bez ```json, bez żadnego tekstu przed/po), o następującej strukturze:
           
-            Odpowiedź sformatuj w następujący sposób:
-            1. Nazwa przepisu
-            2. Lista składników z dokładnymi ilościami (dla porcji dla jednej osoby)
-            3. Instrukcja przygotowania krok po kroku
-            4. Wartość kaloryczna całego dania (w kcal) oraz orientacyjny rozkład makroskładników (białko, węglowodany, tłuszcze)
-            5. Podsumowanie zapytania — wypisz w punktach WSZYSTKIE poniższe parametry, które zostały podane na wejściu, dokładnie z ich wartościami:
-               - Podane produkty
-               - Czy użyto wyłącznie podanych produktów (tak/nie)
-               - Zakres kalorii (od-do)
-               - Typ diety (standardowa / sportowa)
-               - Płeć (chłopak/dziewczynka)
-               - Czas przygotowania (w minutach)
-               - Poziom umiejętności kulinarnych (1-5)
-               - Dieta wegańska (tak/nie)
-               - Niechciane składniki (lub "brak")
-               - Alergie (lub "brak")
+            {
+              "recipeName": "Nazwa przepisu",
+              "ingredients": ["składnik 1 z ilością", "składnik 2 z ilością"],
+              "instructions": "Instrukcja przygotowania krok po kroku",
+              "calories": "Wartość kaloryczna całego dania w kcal (tylko liczba + jednostka)",
+              "protein": "orientacyjna ilość białka (tylko liczba + jednostka)",
+              "carbohydrates": "orientacyjna ilość węglowodanów (tylko liczba + jednostka)",
+              "fat": "orientacyjna ilość tłuszczu (tylko liczba + jednostka)",
+              "developerInfo": {
+                "products": "podane produkty",
+                "onlyUserIngredients": true,
+                "caloriesRange": "od-do",
+                "dietType": "standardowa / sportowa",
+                "gender": "chłopak/dziewczynka",
+                "cookingTime": "czas w minutach",
+                "cookingSkillLevel": "1-5",
+                "isVegan": false,
+                "dislikedIngredients": "lub brak",
+                "allergies": "lub brak"
+              }
+            }
           
             Odpowiedz wyłącznie w języku: $language
-          
-            Nie dodawaj żadnych innych informacji poza punktami 1-5. Nie pisz wstępu, podsumowania ogólnego ani komentarzy poza wskazaną strukturą.
+            Nie dodawaj żadnego tekstu poza samym obiektem JSON.
           ''',
         ),
       ]),
@@ -110,7 +128,18 @@ class MainProvider with ChangeNotifier {
       final response = await aiModel.generateContent(prompt);
 
       if (response.text != null) {
-        answer = response.text ?? '';
+        final rawAnswer = response.text ?? '';
+        final cleaned = rawAnswer
+            .replaceAll(RegExp(r'^```json', multiLine: true), '')
+            .replaceAll('```', '')
+            .trim();
+
+        final Map<String, dynamic> jsonMap = jsonDecode(cleaned);
+        answer = RecipeResponse.fromJson(jsonMap);
+        log(answer.recipeName);
+        log(answer.ingredients.toString());
+        log(answer.instructions);
+        log(answer.developerInfo);
         if (!context.mounted) return;
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) =>
@@ -121,9 +150,9 @@ class MainProvider with ChangeNotifier {
     } catch (e) {
       log('Gemini error: $e');
       if (e.toString().contains('503') || e.toString().contains('UNAVAILABLE')) {
-        answer = 'Spróbuj ponownie';
+        answerError = 'Spróbuj ponownie';
       } else {
-        answer = 'Spróbuj ponownie';
+        answerError = 'Spróbuj ponownie';
       }
     } finally {
       isLoading = false;

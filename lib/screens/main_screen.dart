@@ -43,7 +43,7 @@ class _MainScreenState extends State<MainScreen> {
                             Row(
                               spacing: 8,
                               children: [
-                                data.answer == 'Spróbuj ponownie'
+                                data.answerError == 'Spróbuj ponownie'
                                 ? Text('Spróbuj ponownie za chwilę.')
                                 : SizedBox.shrink(),
                                 Spacer(),

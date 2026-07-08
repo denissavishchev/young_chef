@@ -13,5 +13,10 @@
   "allergies": "Аллергии",
   "notLike": "Не нравится",
   "back": "Назад",
-  "thisFieldCannotBeEmpty": "Это поле не может быть пустым"
+  "thisFieldCannotBeEmpty": "Это поле не может быть пустым",
+  "instructions": "Инструкции",
+  "calories": "Калории:",
+  "protein": "Белки:",
+  "carbohydrates": "Углеводы:",
+  "fat": "Жиры:"
 }

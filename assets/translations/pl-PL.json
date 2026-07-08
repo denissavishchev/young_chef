@@ -13,5 +13,10 @@
   "allergies": "Alergie",
   "notLike": "Nie lubię",
   "back": "Wstecz",
-  "thisFieldCannotBeEmpty": "To pole nie może być puste"
+  "thisFieldCannotBeEmpty": "To pole nie może być puste",
+  "instructions": "Instrukcje",
+  "calories": "Kalorie:",
+  "protein": "Białko:",
+  "carbohydrates": "Węglowodany:",
+  "fat": "Tłuszcz:"
 }
