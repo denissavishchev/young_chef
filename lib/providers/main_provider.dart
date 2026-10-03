@@ -26,7 +26,7 @@ class MainProvider with ChangeNotifier {
   RecipeResponse answer = RecipeResponse(
       recipeName: '',
       ingredients: [],
-      instructions: '',
+      instructions: [],
       calories: '',
       protein: '',
       carbohydrates: '',
@@ -93,13 +93,14 @@ class MainProvider with ChangeNotifier {
             - Jest łatwy do przygotowania w podanym limicie czasu, przy użyciu podstawowych narzędzi kuchennych
             - Jest zdrowy (zbalansowany, bez nadmiaru cukru, soli i tłuszczu)
             - Spełnia wszystkie powyższe parametry (źródło składników, kaloryczność, typ diety, dieta wegańska, niechciane składniki, alergie)
+            - Pole "instructions" MUSI być tablicą stringów: każdy element to JEDEN osobny krok przygotowania.
             
             Odpowiedz WYŁĄCZNIE w formacie czystego JSON (bez markdown, bez ```json, bez żadnego tekstu przed/po), o następującej strukturze:
           
             {
               "recipeName": "Nazwa przepisu",
               "ingredients": ["składnik 1 z ilością", "składnik 2 z ilością"],
-              "instructions": "Instrukcja przygotowania krok po kroku",
+              "instructions": ["krok 1", "krok 2"],
               "calories": "Wartość kaloryczna całego dania w kcal (tylko liczba + jednostka)",
               "protein": "orientacyjna ilość białka (tylko liczba + jednostka)",
               "carbohydrates": "orientacyjna ilość węglowodanów (tylko liczba + jednostka)",
@@ -138,7 +139,7 @@ class MainProvider with ChangeNotifier {
         answer = RecipeResponse.fromJson(jsonMap);
         log(answer.recipeName);
         log(answer.ingredients.toString());
-        log(answer.instructions);
+        log(answer.instructions.toString());
         log(answer.developerInfo);
         if (!context.mounted) return;
         Navigator.pushReplacement(context,
@@ -228,7 +229,6 @@ class MainProvider with ChangeNotifier {
   }
 
   void getValuesFromMemory() async{
-    isLoading = true;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     onlyUserIngredients = prefs.getBool('onlyUserIngredients') ?? true;
     isBoy = prefs.getBool('isBoy') ?? true;
@@ -240,7 +240,6 @@ class MainProvider with ChangeNotifier {
     timeForCooking = prefs.getDouble('timeForCooking') ?? 10;
     isVegan = prefs.getBool('isVegan') ?? false;
     notifyListeners();
-    isLoading = false;
   }
 
   Future<void> initSpeech() async {

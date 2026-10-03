@@ -1,11 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:young_chef/screens/settings_screen.dart';
 import '../../providers/main_provider.dart';
 import '../constants.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -31,10 +32,10 @@ class _MainScreenState extends State<MainScreen> {
         resizeToAvoidBottomInset: true,
         body: Consumer<MainProvider>(
           builder: (context, data, _){
-            return SafeArea(
-                child: Stack(
+            return Stack(
                   children: [
-                    SingleChildScrollView(
+                    SafeArea(
+                      child: SingleChildScrollView(
                       child: Padding(
                         padding: EdgeInsets.all(12),
                         child: Column(
@@ -317,19 +318,24 @@ class _MainScreenState extends State<MainScreen> {
                           ],
                         ),
                       ),
+                      ),
                     ),
-                    data.isLoading
-                        ? Container(
-                      width: size.width,
-                      height: size.height,
-                      color: kDarkBlue.withValues(alpha: 0.3),
-                      child: const Center(child: SpinKitSpinningLines(
-                        color: kDarkBlue,
-                        size: 40,
-                      ),),
-                    ) : const SizedBox.shrink()
+                    if (data.isLoading)
+                      Positioned.fill(
+                        child: ColoredBox(
+                          color: kWhite.withValues(alpha: 0.92),
+                          child: Center(
+                            child: Lottie.asset(
+                              'assets/animations/02_picnic_full.json',
+                              width: size.width * 0.75,
+                              fit: BoxFit.contain,
+                              repeat: true,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
-                ));
+                );
           },
         )
     );
