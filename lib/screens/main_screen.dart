@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:lottie/lottie.dart';
@@ -16,7 +17,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
   @override
   void initState() {
     final data = Provider.of<MainProvider>(context, listen: false);
@@ -27,318 +27,438 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Scaffold(
+    final size = MediaQuery.of(context).size;
+    final title = kTextStyle.copyWith(color: kInk, fontSize: 22.sp);
+    final muted = kTextStyle.copyWith(
+      color: kInk.withValues(alpha: 0.55),
+      fontSize: 20.sp,
+      fontWeight: FontWeight.w600,
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: kScreenBg,
         resizeToAvoidBottomInset: true,
         body: Consumer<MainProvider>(
-          builder: (context, data, _){
+          builder: (context, data, _) {
             return Stack(
-                  children: [
-                    SafeArea(
-                      child: SingleChildScrollView(
-                      child: Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Column(
-                          spacing:8,
+              children: [
+                SafeArea(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 16, 4),
+                        child: Row(
+                          spacing: 10,
                           children: [
-                            Row(
-                              spacing: 8,
-                              children: [
-                                data.answerError == 'Spróbuj ponownie'
-                                ? Text('Spróbuj ponownie za chwilę.')
-                                : SizedBox.shrink(),
-                                Spacer(),
-                                GestureDetector(
-                                    onTap: () => Navigator.pushReplacement(context,
-                                        MaterialPageRoute(builder: (context) => const SettingsScreen())),
-                                    child: Icon(Icons.settings, size: 32, color: kDarkBlue,)),
-                              ],
+                            const Icon(
+                              Icons.restaurant_rounded,
+                              size: 28,
+                              color: kAccent,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 4,
-                              children: [
-                                Text('ingredients'.tr(), style: kTextStyle,),
-                                Stack(
-                                  alignment: Alignment.centerRight,
-                                  children: [
-                                    Container(
-                                      width: size.width,
-                                      constraints: BoxConstraints(
-                                        minHeight: 80,
-                                      ),
-                                      padding: const EdgeInsets.only(left: 8, right: 44),
-                                      margin: const EdgeInsets.only(right: 30),
-                                      decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                              colors: [
-                                                kLightBlue,
-                                                kLightBlue,
-                                                kWhite
-                                              ],
-                                              stops: [0.4, 0.65, 1],
-                                              begin: Alignment.bottomLeft,
-                                              end: Alignment.topRight
-                                          ),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: kDarkBlue.withValues(alpha: 0.2), width: 1),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: kDarkBlue.withValues(alpha: 0.4),
-                                            blurRadius: 5,
-                                            offset: const Offset(5, 3)
-                                          )
-                                        ]
-                                      ),
-                                      child: TextFormField(
-                                        controller: data.questionController,
-                                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                                        keyboardType: TextInputType.multiline,
-                                        cursorColor: kDarkBlue,
-                                        maxLines: null,
-                                        style: kTextStyle.copyWith(fontSize: 32.sp),
-                                        decoration: const InputDecoration(
-                                          border: InputBorder.none,
-                                        ),
-                                        validator: (value){
-                                          if(value == null || value.isEmpty) {
-                                            return 'thisFieldCannotBeEmpty'.tr();
-                                          }
-                                          return null;
-                                        },
-                                      ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Young Chef',
+                                    style: kTextStyle.copyWith(
+                                      color: kInk,
+                                      fontSize: 30.sp,
                                     ),
-                                    data.isListening
-                                      ? Container(
-                                        height: 80,
-                                        padding: const EdgeInsets.symmetric(vertical: 8),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(12),
-                                          gradient: LinearGradient(
-                                              colors: [
-                                                kLightBlue.withValues(alpha: 0.7),
-                                                kLightBlue.withValues(alpha: 0.7),
-                                                kWhite.withValues(alpha: 0.7)
-                                              ],
-                                              stops: [0.4, 0.65, 1],
-                                          ),
-                                        ),
-                                        child: Row(
-                                            spacing: 1.5,
-                                            children: List.generate(6, ((i){
-                                              return SpinKitWave(
-                                                color: kDarkBlue. withValues(alpha: 0.8),
-                                                size: 40,
-                                                itemCount: 10,
-                                              );
-                                            })),
-                                          ),
-                                      )
-                                      : SizedBox.shrink(),
-                                    GestureDetector(
-                                      onTapDown: (_) => data.startListening(context),
-                                      onTapUp: (_) => data.stopListening(),
-                                      onTapCancel: () => data.stopListening(),
-                                      child: Container(
-                                        width: 70,
-                                        height: 70,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                              colors: [
-                                                kLightBlue,
-                                                kWhite
-                                              ],
-                                            stops: [0.4, 1],
-                                          ),
-                                          shape: BoxShape.circle,
-                                          border: Border.all(color: kDarkBlue.withValues(alpha: 0.25), width: 1),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: kDarkBlue.withValues(alpha: 0.4),
-                                              blurRadius: 5,
-                                              offset: const Offset(3, 5)
-                                            )
-                                          ]
-                                        ),
-                                        child: Icon(Icons.mic, size: 48, color: kDarkBlue. withValues(alpha: 0.8),),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Divider(color: kLightBlue,),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'caloriesRange'.tr(args: [
-                                    '${data.caloriesRange.start.round()}',
-                                    '${data.caloriesRange.end.round()}']),
-                                  style: kTextStyle,
-                                ),
-                                SliderTheme(
-                                  data: SliderThemeData(
-                                    trackHeight: 24,
-                                    thumbColor: kWhite,
-                                    rangeThumbShape: const RoundRangeSliderThumbShape(
-                                      enabledThumbRadius: 12,
-                                    ),
-                                    activeTrackColor: kLightBlue,
-                                    inactiveTrackColor: kLightBlue.withValues(alpha: 0.5),
-                                    rangeTickMarkShape: const RoundRangeSliderTickMarkShape(
-                                      tickMarkRadius: 2,
-                                    ),
-                                    activeTickMarkColor: kLightBlue,
-                                    inactiveTickMarkColor: kWhite,
-                                    valueIndicatorColor: kLightBlue,
-                                    showValueIndicator: ShowValueIndicator.onDrag,
                                   ),
-                                  child: RangeSlider(
-                                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-                                    values: data.caloriesRange,
-                                    min: 100,
-                                    max: 1000,
-                                    divisions: 10,
-                                    labels: RangeLabels(
-                                      data.caloriesRange.start.round().toString(),
-                                      data.caloriesRange.end.round().toString(),
-                                    ),
-                                    onChanged: (RangeValues range) => data.setCaloriesRange(range),
+                                  Text(
+                                    'ingredients'.tr(),
+                                    style: muted.copyWith(fontSize: 16.sp),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                            Divider(color: kLightBlue,),
-                            Row(
-                              spacing: 8,
-                              children: [
-                                Text('sportDiet'.tr(), style: kTextStyle,),
-                                Switch(
-                                  value: data.isRegularDiet,
-                                  onChanged: (v) => data.setRegularOrSportDiet(v),
-                                  activeThumbColor: kWhite,
-                                  activeTrackColor: kLightBlue,
-                                  inactiveThumbColor: kWhite,
-                                  inactiveTrackColor: kLightBlue.withValues(alpha: 0.5),
-                                  trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-                                ),
-                                Text('regularDiet'.tr(), style: kTextStyle,),
-                              ],
-                            ),
-                            Divider(color: kLightBlue,),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'timeForCooking'.tr(args: ['${data.timeForCooking.toInt()}']), style: kTextStyle,
-                                ),
-                                SliderTheme(
-                                  data: SliderThemeData(
-                                    trackHeight: 24,
-                                    thumbColor: kWhite,
-                                    rangeThumbShape: const RoundRangeSliderThumbShape(
-                                      enabledThumbRadius: 12,
-                                    ),
-                                    activeTrackColor: kLightBlue,
-                                    inactiveTrackColor: kLightBlue.withValues(alpha: 0.5),
-                                    rangeTickMarkShape: const RoundRangeSliderTickMarkShape(
-                                      tickMarkRadius: 2,
-                                    ),
-                                    activeTickMarkColor: kLightBlue,
-                                    inactiveTickMarkColor: kWhite,
-                                    valueIndicatorColor: kLightBlue,
-                                    showValueIndicator: ShowValueIndicator.onDrag,
-                                  ),
-                                  child: Slider(
-                                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-                                    value: data.timeForCooking,
-                                    min: 10,
-                                    max: 60,
-                                    divisions: 5,
-                                    onChanged: (v) => data.setTimeForCooking(v),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Divider(color: kLightBlue,),
-                            Row(
-                              spacing: 8,
-                              children: [
-                                Text('isVegan'.tr(), style: kTextStyle,),
-                                Switch(
-                                  value: data.isVegan,
-                                  onChanged: (v) => data.setIsVegan(v),
-                                  activeThumbColor: kWhite,
-                                  activeTrackColor: kLightBlue,
-                                  inactiveThumbColor: kWhite,
-                                  inactiveTrackColor: kLightBlue.withValues(alpha: 0.5),
-                                  trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-                                ),
-                              ],
-                            ),
-                            Divider(color: kLightBlue,),
                             GestureDetector(
-                              onTap: () => data.getRecipe(context),
-                              child: Container(
-                                width: size.width * 0.6,
-                                height: size.height * 0.07,
-                                decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                        colors: [
-                                          kLightBlue,
-                                          kLightBlue,
-                                          kWhite
-                                        ],
-                                        stops: [0.4, 0.65, 1],
-                                      begin: Alignment.bottomLeft,
-                                      end: Alignment.topRight
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: kDarkBlue.withValues(alpha: 0.2), width: 1),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: kDarkBlue.withValues(alpha: 0.4),
-                                      blurRadius: 5,
-                                      offset: const Offset(5, 3)
-                                    )
-                                  ]
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  spacing: 8,
-                                  children: [
-                                    const SizedBox(width: 32,),
-                                    Text('createRecipe'.tr(), style: kTextStyle.copyWith(fontSize: 32.sp,)),
-                                    Icon(Icons.cookie, size: 32, color: kDarkBlue.withValues(alpha: 0.8),)
-                                  ],
+                              onTap: () => Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SettingsScreen(),
                                 ),
                               ),
-                            )
+                              child: Container(
+                                width: 46,
+                                height: 46,
+                                decoration: const BoxDecoration(
+                                  color: kCard,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.settings_rounded,
+                                  size: 24,
+                                  color: kInk,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
+                      if (data.answerError == 'Spróbuj ponownie')
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: kAccentSoft,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              'tryAgainSoon'.tr(),
+                              style: kTextStyle.copyWith(
+                                color: kAccent,
+                                fontSize: 20.sp,
+                              ),
+                            ),
+                          ),
+                        ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                          child: Column(
+                            spacing: 14,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.fromLTRB(20, 16, 12, 14),
+                                decoration: BoxDecoration(
+                                  color: kCard,
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 10,
+                                  children: [
+                                    Text('ingredients'.tr(), style: title),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Expanded(
+                                          child: Stack(
+                                            children: [
+                                              TextFormField(
+                                                controller: data.questionController,
+                                                autovalidateMode:
+                                                    AutovalidateMode.onUserInteraction,
+                                                keyboardType: TextInputType.multiline,
+                                                cursorColor: kAccent,
+                                                maxLines: null,
+                                                minLines: 2,
+                                                style: kTextStyle.copyWith(
+                                                  fontSize: 26.sp,
+                                                  color: kInk,
+                                                ),
+                                                decoration: InputDecoration(
+                                                  border: InputBorder.none,
+                                                  isDense: true,
+                                                  hintText: 'ingredientsHint'.tr(),
+                                                  hintStyle: kTextStyle.copyWith(
+                                                    fontSize: 24.sp,
+                                                    color: kInk.withValues(alpha: 0.35),
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                validator: (value) {
+                                                  if (value == null || value.isEmpty) {
+                                                    return 'thisFieldCannotBeEmpty'.tr();
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                              if (data.isListening)
+                                                Positioned.fill(
+                                                  child: ColoredBox(
+                                                    color: kCard.withValues(alpha: 0.8),
+                                                    child: Center(
+                                                      child: SpinKitWave(
+                                                        color: kAccent,
+                                                        size: 28,
+                                                        itemCount: 7,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        GestureDetector(
+                                          onTapDown: (_) => data.startListening(context),
+                                          onTapUp: (_) => data.stopListening(),
+                                          onTapCancel: () => data.stopListening(),
+                                          child: AnimatedContainer(
+                                            duration: const Duration(milliseconds: 180),
+                                            width: 56,
+                                            height: 56,
+                                            decoration: BoxDecoration(
+                                              color: data.isListening
+                                                  ? kAccent
+                                                  : kAccentSoft,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.mic_rounded,
+                                              size: 28,
+                                              color: data.isListening
+                                                  ? Colors.white
+                                                  : kAccent,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+                                decoration: BoxDecoration(
+                                  color: kCard,
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 16,
+                                  children: [
+                                    Text('recipeOptions'.tr(), style: title),
+                                    _OptionBlock(
+                                      title: 'caloriesLabel'.tr(),
+                                      value:
+                                          '${data.caloriesRange.start.round()}–${data.caloriesRange.end.round()} ${'kcalUnit'.tr()}',
+                                      titleStyle: muted,
+                                      child: SliderTheme(
+                                        data: _sliderTheme(),
+                                        child: RangeSlider(
+                                          padding: const EdgeInsets.symmetric(vertical: 4),
+                                          values: data.caloriesRange,
+                                          min: 100,
+                                          max: 1000,
+                                          divisions: 10,
+                                          labels: RangeLabels(
+                                            data.caloriesRange.start.round().toString(),
+                                            data.caloriesRange.end.round().toString(),
+                                          ),
+                                          onChanged: (range) =>
+                                              data.setCaloriesRange(range),
+                                        ),
+                                      ),
+                                    ),
+                                    _OptionBlock(
+                                      title: 'timeLabel'.tr(),
+                                      value:
+                                          '${data.timeForCooking.toInt()} ${'minUnit'.tr()}',
+                                      titleStyle: muted,
+                                      child: SliderTheme(
+                                        data: _sliderTheme(),
+                                        child: Slider(
+                                          padding: const EdgeInsets.symmetric(vertical: 4),
+                                          value: data.timeForCooking,
+                                          min: 10,
+                                          max: 60,
+                                          divisions: 5,
+                                          onChanged: (v) => data.setTimeForCooking(v),
+                                        ),
+                                      ),
+                                    ),
+                                    Row(
+                                      spacing: 10,
+                                      children: [
+                                        _Chip(
+                                          label: 'sportDiet'.tr(),
+                                          selected: !data.isRegularDiet,
+                                          onTap: () =>
+                                              data.setRegularOrSportDiet(false),
+                                        ),
+                                        _Chip(
+                                          label: 'regularDiet'.tr(),
+                                          selected: data.isRegularDiet,
+                                          onTap: () =>
+                                              data.setRegularOrSportDiet(true),
+                                        ),
+                                      ],
+                                    ),
+                                    _Chip(
+                                      label: 'isVegan'.tr(),
+                                      selected: data.isVegan,
+                                      onTap: () => data.setIsVegan(!data.isVegan),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    if (data.isLoading)
-                      Positioned.fill(
-                        child: ColoredBox(
-                          color: kWhite.withValues(alpha: 0.92),
-                          child: Center(
-                            child: Lottie.asset(
-                              'assets/animations/02_picnic_full.json',
-                              width: size.width * 0.75,
-                              fit: BoxFit.contain,
-                              repeat: true,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: GestureDetector(
+                          onTap: () => data.getRecipe(context),
+                          child: Container(
+                            width: double.infinity,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: kAccent,
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 10,
+                              children: [
+                                Text(
+                                  'createRecipe'.tr(),
+                                  style: kTextStyle.copyWith(
+                                    fontSize: 26.sp,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade600,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.cookie_rounded,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                  ],
-                );
+                    ],
+                  ),
+                ),
+                if (data.isLoading)
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: kScreenBg.withValues(alpha: 0.94),
+                      child: Center(
+                        child: Lottie.asset(
+                          'assets/animations/02_picnic_full.json',
+                          width: size.width * 0.75,
+                          fit: BoxFit.contain,
+                          repeat: true,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
           },
-        )
+        ),
+      ),
+    );
+  }
+
+  SliderThemeData _sliderTheme() {
+    return SliderThemeData(
+      trackHeight: 8,
+      thumbColor: kAccent,
+      rangeThumbShape: const RoundRangeSliderThumbShape(
+        enabledThumbRadius: 11,
+      ),
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 11),
+      activeTrackColor: kAccent,
+      inactiveTrackColor: kTrackMuted,
+      rangeTickMarkShape: const RoundRangeSliderTickMarkShape(
+        tickMarkRadius: 0,
+      ),
+      tickMarkShape: SliderTickMarkShape.noTickMark,
+      activeTickMarkColor: Colors.transparent,
+      inactiveTickMarkColor: Colors.transparent,
+      valueIndicatorColor: kInk,
+      showValueIndicator: ShowValueIndicator.onDrag,
+      overlayColor: kAccent.withValues(alpha: 0.12),
     );
   }
 }
 
+class _OptionBlock extends StatelessWidget {
+  const _OptionBlock({
+    required this.title,
+    required this.value,
+    required this.titleStyle,
+    required this.child,
+  });
+
+  final String title;
+  final String value;
+  final TextStyle titleStyle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text(title, style: titleStyle)),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: kInk,
+                borderRadius: BorderRadius.circular(40),
+              ),
+              child: Text(
+                value,
+                style: kTextStyle.copyWith(color: Colors.white, fontSize: 18.sp),
+              ),
+            ),
+          ],
+        ),
+        child,
+      ],
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
+        decoration: BoxDecoration(
+          color: selected ? kAccent : kInk,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: kTextStyle.copyWith(
+            fontSize: 18.sp,
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
