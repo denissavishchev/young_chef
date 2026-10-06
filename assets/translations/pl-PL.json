@@ -25,5 +25,21 @@
   "calories": "Kalorie:",
   "protein": "Białko:",
   "carbohydrates": "Węglowodany:",
-  "fat": "Tłuszcz:"
+  "fat": "Tłuszcz:",
+  "timer": "Minutnik",
+  "setTimer": "Ustaw minutnik",
+  "startTimer": "Start",
+  "pauseTimer": "Pauza",
+  "continueTimer": "Kontynuuj",
+  "stopTimer": "Stop",
+  "timerDoneTitle": "Czas minął!",
+  "timerDoneBody": "Minutnik dla przepisu {} zakończył odliczanie. Dotknij, aby wrócić do przepisu.",
+  "timerMinutesShort": "min",
+  "timerNotificationChannel": "Minutnik kuchenny",
+  "favorites": "Ulubione",
+  "saveToFavorites": "Zapisz",
+  "removeFromFavorites": "Usuń z ulubionych",
+  "noFavorites": "Brak zapisanych przepisów.",
+  "vegan": "Wegańskie",
+  "scanFailed": "Nie udało się rozpoznać produktów. Spróbuj ponownie."
 }

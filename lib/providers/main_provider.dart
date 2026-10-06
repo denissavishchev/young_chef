@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../models/answer_model.dart';
@@ -18,6 +19,7 @@ class MainProvider with ChangeNotifier {
 
   final SpeechToText speech = SpeechToText();
   bool isListening = false;
+  bool isScanning = false;
   String baseText = '';
 
   String selectedLanguage = 'English - UK';
@@ -33,6 +35,9 @@ class MainProvider with ChangeNotifier {
       fat: '',
       developerInfo: '');
   
+  /// Key of the current [answer] in the favorites box, null if not saved.
+  String? favoriteId;
+
   String answerError = '';
 
   bool onlyUserIngredients = true;
@@ -136,7 +141,12 @@ class MainProvider with ChangeNotifier {
             .trim();
 
         final Map<String, dynamic> jsonMap = jsonDecode(cleaned);
-        answer = RecipeResponse.fromJson(jsonMap);
+        answer = RecipeResponse.fromJson(
+          jsonMap,
+          fallbackTime: timeForCooking.toInt(),
+          fallbackVegan: isVegan,
+        );
+        favoriteId = null;
         log(answer.recipeName);
         log(answer.ingredients.toString());
         log(answer.instructions.toString());
@@ -159,6 +169,51 @@ class MainProvider with ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Takes a photo, lets the model recognize the food products on it and
+  /// appends them to the ingredients field. Returns false if nothing was added.
+  Future<bool> scanIngredients(BuildContext context) async {
+    final language = Localizations.localeOf(context).languageCode;
+    final photo = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1280,
+      imageQuality: 80,
+    );
+    if (photo == null) return true;
+    isScanning = true;
+    notifyListeners();
+    try {
+      final bytes = await photo.readAsBytes();
+      final response = await aiModel.generateContent([
+        Content.multi([
+          TextPart(
+            'List the food products and ingredients visible in this photo '
+            '(e.g. from a fridge or a table). Answer ONLY with a short '
+            'comma-separated list in the language: $language. No other text. '
+            'If there is no food, answer with an empty string.',
+          ),
+          DataPart('image/jpeg', bytes),
+        ]),
+      ]);
+      final products = (response.text ?? '').trim().replaceAll('\n', ', ');
+      if (products.isEmpty) return false;
+      final current = questionController.text.trim();
+      questionController.text =
+          current.isEmpty ? products : '$current, $products';
+      return true;
+    } catch (e) {
+      log('Scan error: $e');
+      return false;
+    } finally {
+      isScanning = false;
+      notifyListeners();
+    }
+  }
+
+  void setFavoriteId(String? id) {
+    favoriteId = id;
+    notifyListeners();
   }
 
   void setLanguage(AppLanguage value, context){

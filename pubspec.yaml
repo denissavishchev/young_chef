@@ -26,6 +26,11 @@ dependencies:
   google_generative_ai: ^0.4.7
   speech_to_text: ^7.4.0
   lottie: ^3.6.1
+  alarm: ^5.15.0
+  permission_handler: ^12.0.3
+  hive_ce: ^2.20.1
+  hive_ce_flutter: ^2.4.0
+  image_picker: ^1.2.4
 
 dev_dependencies:
   flutter_test:
@@ -41,4 +46,5 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
+    - assets/sounds/
     - keys.env

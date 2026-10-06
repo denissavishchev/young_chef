@@ -9,13 +9,13 @@ const kOrange = Color(0xfff67f5c);
 final kTextStyle = TextStyle(
     color: kDarkBlue,
     fontWeight: FontWeight.bold,
-    fontSize: 24.sp,
+    fontSize: 12.sp,
 );
 
 final kBigTextStyle = TextStyle(
     color: kDarkBlue,
     fontWeight: FontWeight.bold,
-    fontSize: 44.sp,
+    fontSize: 15.sp,
 );
 
 const kScreenBg = Color(0xFFF9F4F1);

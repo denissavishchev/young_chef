@@ -25,5 +25,21 @@
   "calories": "Calories:",
   "protein": "Protein:",
   "carbohydrates": "Carbohydrates:",
-  "fat": "Fat:"
+  "fat": "Fat:",
+  "timer": "Timer",
+  "setTimer": "Set timer",
+  "startTimer": "Start",
+  "pauseTimer": "Pause",
+  "continueTimer": "Continue",
+  "stopTimer": "Stop",
+  "timerDoneTitle": "Time is up!",
+  "timerDoneBody": "Your timer for {} has finished. Tap to go back to the recipe.",
+  "timerMinutesShort": "min",
+  "timerNotificationChannel": "Cooking timer",
+  "favorites": "Favorites",
+  "saveToFavorites": "Save",
+  "removeFromFavorites": "Remove from favorites",
+  "noFavorites": "No saved recipes yet.",
+  "vegan": "Vegan",
+  "scanFailed": "Could not recognize any products. Try again."
 }

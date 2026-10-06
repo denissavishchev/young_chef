@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:young_chef/screens/favorites_screen.dart';
 import 'package:young_chef/screens/settings_screen.dart';
 import '../../providers/main_provider.dart';
 import '../constants.dart';
@@ -28,10 +28,9 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final title = kTextStyle.copyWith(color: kInk, fontSize: 22.sp);
+    final title = kTextStyle.copyWith(color: kInk);
     final muted = kTextStyle.copyWith(
       color: kInk.withValues(alpha: 0.55),
-      fontSize: 20.sp,
       fontWeight: FontWeight.w600,
     );
 
@@ -63,16 +62,34 @@ class _MainScreenState extends State<MainScreen> {
                                 children: [
                                   Text(
                                     'Young Chef',
-                                    style: kTextStyle.copyWith(
-                                      color: kInk,
-                                      fontSize: 30.sp,
-                                    ),
+                                    style: kBigTextStyle.copyWith(color: kInk),
                                   ),
                                   Text(
                                     'ingredients'.tr(),
-                                    style: muted.copyWith(fontSize: 16.sp),
+                                    style: muted,
                                   ),
                                 ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const FavoritesScreen(),
+                                ),
+                              ),
+                              child: Container(
+                                width: 46,
+                                height: 46,
+                                decoration: const BoxDecoration(
+                                  color: kCard,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.favorite_rounded,
+                                  size: 24,
+                                  color: kAccent,
+                                ),
                               ),
                             ),
                             GestureDetector(
@@ -116,7 +133,6 @@ class _MainScreenState extends State<MainScreen> {
                               'tryAgainSoon'.tr(),
                               style: kTextStyle.copyWith(
                                 color: kAccent,
-                                fontSize: 20.sp,
                               ),
                             ),
                           ),
@@ -154,7 +170,6 @@ class _MainScreenState extends State<MainScreen> {
                                                 maxLines: null,
                                                 minLines: 2,
                                                 style: kTextStyle.copyWith(
-                                                  fontSize: 26.sp,
                                                   color: kInk,
                                                 ),
                                                 decoration: InputDecoration(
@@ -162,7 +177,6 @@ class _MainScreenState extends State<MainScreen> {
                                                   isDense: true,
                                                   hintText: 'ingredientsHint'.tr(),
                                                   hintStyle: kTextStyle.copyWith(
-                                                    fontSize: 24.sp,
                                                     color: kInk.withValues(alpha: 0.35),
                                                     fontWeight: FontWeight.w600,
                                                   ),
@@ -188,6 +202,45 @@ class _MainScreenState extends State<MainScreen> {
                                                   ),
                                                 ),
                                             ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        GestureDetector(
+                                          onTap: data.isScanning
+                                              ? null
+                                              : () async {
+                                                  final messenger =
+                                                      ScaffoldMessenger.of(context);
+                                                  final ok =
+                                                      await data.scanIngredients(context);
+                                                  if (!ok) {
+                                                    messenger.showSnackBar(
+                                                      SnackBar(
+                                                        content: Text('scanFailed'.tr()),
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                          child: Container(
+                                            width: 56,
+                                            height: 56,
+                                            decoration: const BoxDecoration(
+                                              color: kAccentSoft,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: data.isScanning
+                                                ? const Padding(
+                                                    padding: EdgeInsets.all(16),
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 3,
+                                                      color: kAccent,
+                                                    ),
+                                                  )
+                                                : const Icon(
+                                                    Icons.photo_camera_rounded,
+                                                    size: 28,
+                                                    color: kAccent,
+                                                  ),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
@@ -317,21 +370,13 @@ class _MainScreenState extends State<MainScreen> {
                                 Text(
                                   'createRecipe'.tr(),
                                   style: kTextStyle.copyWith(
-                                    fontSize: 26.sp,
                                     color: Colors.white,
                                   ),
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade600,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.cookie_rounded,
-                                    size: 24,
-                                    color: Colors.white,
-                                  ),
+                                const Icon(
+                                  Icons.cookie_rounded,
+                                  size: 24,
+                                  color: Colors.white,
                                 ),
                               ],
                             ),
@@ -415,7 +460,7 @@ class _OptionBlock extends StatelessWidget {
               ),
               child: Text(
                 value,
-                style: kTextStyle.copyWith(color: Colors.white, fontSize: 18.sp),
+                style: kTextStyle.copyWith(color: Colors.white),
               ),
             ),
           ],
@@ -453,7 +498,6 @@ class _Chip extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: kTextStyle.copyWith(
-            fontSize: 18.sp,
             color: Colors.white,
             fontWeight: FontWeight.w700,
           ),

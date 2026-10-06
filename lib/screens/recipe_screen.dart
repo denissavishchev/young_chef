@@ -1,23 +1,36 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../providers/favorites_provider.dart';
 import '../../providers/main_provider.dart';
+import '../../providers/timer_provider.dart';
 import '../constants.dart';
 import 'main_screen.dart';
 
 class RecipeScreen extends StatefulWidget {
   const RecipeScreen({super.key});
 
+  /// True while a [RecipeScreen] is in the tree (used by notification taps).
+  static bool isOpen = false;
+
   @override
   State<RecipeScreen> createState() => _RecipeScreenState();
 }
 
 class _RecipeScreenState extends State<RecipeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    RecipeScreen.isOpen = true;
+  }
+
   final PageController _pageController = PageController(viewportFraction: 0.92);
   int _currentPage = 0;
 
   @override
   void dispose() {
+    RecipeScreen.isOpen = false;
     _pageController.dispose();
     super.dispose();
   }
@@ -59,7 +72,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
                         }),
                       ),
                     ),
-                    Expanded(
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.34,
                       child: PageView.builder(
                         controller: _pageController,
                         itemCount: pageCount,
@@ -94,8 +108,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                                 spacing: 8,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    '${'instructions'.tr()} ${stepIndex + 1}/${steps.length}',
+                                  Text('${'instructions'.tr()} ${stepIndex + 1}/${steps.length}',
                                     style: kTextStyle,
                                   ),
                                   Expanded(
@@ -122,18 +135,50 @@ class _RecipeScreenState extends State<RecipeScreen> {
                         },
                       ),
                     ),
+                    _TimerSection(recipeName: recipe.recipeName),
+                    const Spacer(),
                     Divider(color: kLightBlue,),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(data.answer.developerInfo.toString(), style: kTextStyle,),
                     ),
                     Divider(color: kLightBlue,),
-                    ElevatedButton(
-                        onPressed: () => Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context) =>
-                            const MainScreen())),
-                        child: Text('back'.tr(), style: kTextStyle,)
-                    )
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 12,
+                      children: [
+                        ElevatedButton(
+                            onPressed: () => Navigator.pushReplacement(context,
+                                MaterialPageRoute(builder: (context) =>
+                                const MainScreen())),
+                            child: Text('back'.tr(), style: kTextStyle,)
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            final favorites = context.read<FavoritesProvider>();
+                            final id = data.favoriteId;
+                            if (id == null) {
+                              data.setFavoriteId(await favorites.add(recipe));
+                            } else {
+                              await favorites.remove(id);
+                              data.setFavoriteId(null);
+                            }
+                          },
+                          icon: Icon(
+                            data.favoriteId == null
+                                ? Icons.favorite_border_rounded
+                                : Icons.heart_broken_rounded,
+                            color: kOrange,
+                          ),
+                          label: Text(
+                            data.favoriteId == null
+                                ? 'saveToFavorites'.tr()
+                                : 'removeFromFavorites'.tr(),
+                            style: kTextStyle.copyWith(color: kOrange),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),);
           },
@@ -193,6 +238,217 @@ class _RecipeCard extends StatelessWidget {
           ]
       ),
       child: child,
+    );
+  }
+}
+
+
+String _formatTime(Duration d) {
+  final m = d.inMinutes.toString().padLeft(2, '0');
+  final sec = (d.inSeconds % 60).toString().padLeft(2, '0');
+  return '$m:$sec';
+}
+
+class _TimerSection extends StatelessWidget {
+  const _TimerSection({required this.recipeName});
+
+  final String recipeName;
+
+  Future<void> _pickDuration(BuildContext context) async {
+    final timer = context.read<TimerProvider>();
+    final minutes = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: kWhite,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const _TimerPickerSheet(),
+    );
+    if (minutes != null) {
+      await timer.start(Duration(minutes: minutes), recipeName);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<TimerProvider>(
+      builder: (context, timer, _) {
+        final status = timer.status;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            spacing: 8,
+            children: [
+              if (status != TimerStatus.idle) ...[
+                Text(
+                  status == TimerStatus.finished
+                      ? 'timerDoneTitle'.tr()
+                      : _formatTime(timer.remaining),
+                  style: kBigTextStyle.copyWith(
+                    color: status == TimerStatus.finished ? kOrange : kDarkBlue,
+                  ),
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: timer.progress,
+                    minHeight: 6,
+                    color: kOrange,
+                    backgroundColor: kLightBlue.withValues(alpha: 0.45),
+                  ),
+                ),
+              ],
+              Row(
+                spacing: 12,
+                children: [
+                  if (status == TimerStatus.idle)
+                    Expanded(
+                      child: _TimerButton(
+                        icon: Icons.timer_outlined,
+                        label: 'setTimer'.tr(),
+                        onPressed: () => _pickDuration(context),
+                      ),
+                    ),
+                  if (status == TimerStatus.running)
+                    Expanded(
+                      child: _TimerButton(
+                        icon: Icons.pause_rounded,
+                        label: 'pauseTimer'.tr(),
+                        onPressed: timer.pause,
+                      ),
+                    ),
+                  if (status == TimerStatus.paused) ...[
+                    Expanded(
+                      child: _TimerButton(
+                        icon: Icons.stop_rounded,
+                        label: 'stopTimer'.tr(),
+                        filled: false,
+                        onPressed: timer.stop,
+                      ),
+                    ),
+                    Expanded(
+                      child: _TimerButton(
+                        icon: Icons.play_arrow_rounded,
+                        label: 'continueTimer'.tr(),
+                        onPressed: timer.resume,
+                      ),
+                    ),
+                  ],
+                  if (status == TimerStatus.finished)
+                    Expanded(
+                      child: _TimerButton(
+                        icon: Icons.stop_rounded,
+                        label: 'stopTimer'.tr(),
+                        onPressed: timer.stop,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TimerButton extends StatelessWidget {
+  const _TimerButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    this.filled = true,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: filled ? Colors.white : kOrange),
+      label: Text(
+        label,
+        style: kTextStyle.copyWith(color: filled ? Colors.white : kOrange),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: filled ? kOrange : kWhite,
+        side: const BorderSide(color: kOrange),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+    );
+  }
+}
+
+class _TimerPickerSheet extends StatefulWidget {
+  const _TimerPickerSheet();
+
+  @override
+  State<_TimerPickerSheet> createState() => _TimerPickerSheetState();
+}
+
+class _TimerPickerSheetState extends State<_TimerPickerSheet> {
+  int _minutes = 5;
+  late final FixedExtentScrollController _controller =
+      FixedExtentScrollController(initialItem: _minutes - 1);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 12,
+          children: [
+            Text('setTimer'.tr(), style: kTextStyle),
+            SizedBox(
+              height: 180,
+              child: CupertinoPicker(
+                scrollController: _controller,
+                itemExtent: 44,
+                onSelectedItemChanged: (i) => _minutes = i + 1,
+                children: List.generate(
+                  60,
+                  (i) => Center(
+                    child: Text(
+                      '${i + 1} ${'timerMinutesShort'.tr()}',
+                      style: kTextStyle,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context, _minutes),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kOrange,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Text(
+                  'startTimer'.tr(),
+                  style: kTextStyle.copyWith(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -25,5 +25,21 @@
   "calories": "Калории:",
   "protein": "Белки:",
   "carbohydrates": "Углеводы:",
-  "fat": "Жиры:"
+  "fat": "Жиры:",
+  "timer": "Таймер",
+  "setTimer": "Установить таймер",
+  "startTimer": "Старт",
+  "pauseTimer": "Пауза",
+  "continueTimer": "Продолжить",
+  "stopTimer": "Стоп",
+  "timerDoneTitle": "Время вышло!",
+  "timerDoneBody": "Таймер для рецепта {} закончил отсчёт. Нажмите, чтобы вернуться к рецепту.",
+  "timerMinutesShort": "мин",
+  "timerNotificationChannel": "Кухонный таймер",
+  "favorites": "Избранное",
+  "saveToFavorites": "Сохранить",
+  "removeFromFavorites": "Удалить из избранного",
+  "noFavorites": "Пока нет сохранённых рецептов.",
+  "vegan": "Веганское",
+  "scanFailed": "Не удалось распознать продукты. Попробуйте ещё раз."
 }
