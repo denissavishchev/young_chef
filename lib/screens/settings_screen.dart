@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../providers/main_provider.dart';
 import '../constants.dart';
 import '../widgets/language_widget.dart';
-import 'main_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -23,12 +22,8 @@ class SettingsScreen extends StatelessWidget {
                       spacing: 12,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            GestureDetector(
-                              onTap: () => Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (context) => const MainScreen())),
-                                child: Icon(Icons.backspace_rounded)),
                             LanguageWidget(),
                           ],
                         ),

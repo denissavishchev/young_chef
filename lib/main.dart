@@ -9,7 +9,7 @@ import 'package:young_chef/providers/favorites_provider.dart';
 import 'package:young_chef/providers/main_provider.dart';
 import 'package:young_chef/providers/timer_provider.dart';
 import 'package:alarm/alarm.dart';
-import 'screens/main_screen.dart';
+import 'screens/home_shell.dart';
 import 'screens/recipe_screen.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -23,9 +23,10 @@ void _openRecipeFromNotification() {
     return;
   }
   navigator.pushAndRemoveUntil(
-    MaterialPageRoute(builder: (_) => const RecipeScreen()),
+    MaterialPageRoute(builder: (_) => const HomeShell()),
     (_) => false,
   );
+  navigator.push(MaterialPageRoute(builder: (_) => const RecipeScreen()));
 }
 
 void main() async {
@@ -62,7 +63,7 @@ void main() async {
                 localizationsDelegates: context.localizationDelegates,
                 supportedLocales: context.supportedLocales,
                 locale: context.locale,
-                home: const MainScreen(),
+                home: const HomeShell(),
               ),
             );
           })));

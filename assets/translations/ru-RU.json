@@ -41,5 +41,17 @@
   "removeFromFavorites": "Удалить из избранного",
   "noFavorites": "Пока нет сохранённых рецептов.",
   "vegan": "Веганское",
-  "scanFailed": "Не удалось распознать продукты. Попробуйте ещё раз."
+  "scanFailed": "Не удалось распознать продукты. Попробуйте ещё раз.",
+  "addPhotoTitle": "Добавить фото?",
+  "addPhotoSubtitle": "Добавьте фото вашего блюда в избранное.",
+  "takePhoto": "Сделать фото",
+  "chooseFromGallery": "Выбрать из галереи",
+  "saveWithoutPhoto": "Сохранить без фото",
+  "removeFavoriteTitle": "Удалить из избранного?",
+  "removeFavoriteBody": "Рецепт и его фото будут удалены.",
+  "cancel": "Отмена",
+  "remove": "Удалить",
+  "navHome": "Избранное",
+  "navCreate": "Создать рецепт",
+  "navSettings": "Настройки"
 }

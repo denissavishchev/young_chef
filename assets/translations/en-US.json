@@ -41,5 +41,17 @@
   "removeFromFavorites": "Remove from favorites",
   "noFavorites": "No saved recipes yet.",
   "vegan": "Vegan",
-  "scanFailed": "Could not recognize any products. Try again."
+  "scanFailed": "Could not recognize any products. Try again.",
+  "addPhotoTitle": "Add a photo?",
+  "addPhotoSubtitle": "Add a photo of your dish to this favorite.",
+  "takePhoto": "Take a photo",
+  "chooseFromGallery": "Choose from gallery",
+  "saveWithoutPhoto": "Save without photo",
+  "removeFavoriteTitle": "Remove from favorites?",
+  "removeFavoriteBody": "The recipe and its photo will be deleted.",
+  "cancel": "Cancel",
+  "remove": "Remove",
+  "navHome": "Favorites",
+  "navCreate": "Create recipe",
+  "navSettings": "Settings"
 }

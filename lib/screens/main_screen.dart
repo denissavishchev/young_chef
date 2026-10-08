@@ -2,10 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:young_chef/screens/favorites_screen.dart';
-import 'package:young_chef/screens/settings_screen.dart';
 import '../../providers/main_provider.dart';
 import '../constants.dart';
 
@@ -27,7 +24,6 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final title = kTextStyle.copyWith(color: kInk);
     final muted = kTextStyle.copyWith(
       color: kInk.withValues(alpha: 0.55),
@@ -69,48 +65,6 @@ class _MainScreenState extends State<MainScreen> {
                                     style: muted,
                                   ),
                                 ],
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const FavoritesScreen(),
-                                ),
-                              ),
-                              child: Container(
-                                width: 46,
-                                height: 46,
-                                decoration: const BoxDecoration(
-                                  color: kCard,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.favorite_rounded,
-                                  size: 24,
-                                  color: kAccent,
-                                ),
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SettingsScreen(),
-                                ),
-                              ),
-                              child: Container(
-                                width: 46,
-                                height: 46,
-                                decoration: const BoxDecoration(
-                                  color: kCard,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.settings_rounded,
-                                  size: 24,
-                                  color: kInk,
-                                ),
                               ),
                             ),
                           ],
@@ -391,12 +345,7 @@ class _MainScreenState extends State<MainScreen> {
                     child: ColoredBox(
                       color: kScreenBg.withValues(alpha: 0.94),
                       child: Center(
-                        child: Lottie.asset(
-                          'assets/animations/02_picnic_full.json',
-                          width: size.width * 0.75,
-                          fit: BoxFit.contain,
-                          repeat: true,
-                        ),
+                        child: const CircularProgressIndicator(color: kAccent),
                       ),
                     ),
                   ),

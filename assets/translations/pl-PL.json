@@ -41,5 +41,17 @@
   "removeFromFavorites": "Usuń z ulubionych",
   "noFavorites": "Brak zapisanych przepisów.",
   "vegan": "Wegańskie",
-  "scanFailed": "Nie udało się rozpoznać produktów. Spróbuj ponownie."
+  "scanFailed": "Nie udało się rozpoznać produktów. Spróbuj ponownie.",
+  "addPhotoTitle": "Dodać zdjęcie?",
+  "addPhotoSubtitle": "Dodaj zdjęcie swojego dania do ulubionych.",
+  "takePhoto": "Zrób zdjęcie",
+  "chooseFromGallery": "Wybierz z galerii",
+  "saveWithoutPhoto": "Zapisz bez zdjęcia",
+  "removeFavoriteTitle": "Usunąć z ulubionych?",
+  "removeFavoriteBody": "Przepis i jego zdjęcie zostaną usunięte.",
+  "cancel": "Anuluj",
+  "remove": "Usuń",
+  "navHome": "Ulubione",
+  "navCreate": "Stwórz przepis",
+  "navSettings": "Ustawienia"
 }

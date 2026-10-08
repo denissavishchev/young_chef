@@ -152,7 +152,7 @@ class MainProvider with ChangeNotifier {
         log(answer.instructions.toString());
         log(answer.developerInfo);
         if (!context.mounted) return;
-        Navigator.pushReplacement(context,
+        Navigator.push(context,
             MaterialPageRoute(builder: (context) =>
             const RecipeScreen()));
       } else {

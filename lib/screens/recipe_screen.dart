@@ -1,12 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../providers/favorites_provider.dart';
 import '../../providers/main_provider.dart';
 import '../../providers/timer_provider.dart';
 import '../constants.dart';
-import 'main_screen.dart';
+
+enum _PhotoChoice { camera, gallery, none }
 
 class RecipeScreen extends StatefulWidget {
   const RecipeScreen({super.key});
@@ -33,6 +35,84 @@ class _RecipeScreenState extends State<RecipeScreen> {
     RecipeScreen.isOpen = false;
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleFavorite(BuildContext context, MainProvider data) async {
+    final favorites = context.read<FavoritesProvider>();
+    final id = data.favoriteId;
+    if (id != null) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('removeFavoriteTitle'.tr()),
+          content: Text('removeFavoriteBody'.tr()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('cancel'.tr()),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text('remove'.tr(), style: const TextStyle(color: kAccent)),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      await favorites.remove(id);
+      data.setFavoriteId(null);
+      return;
+    }
+    final choice = await showModalBottomSheet<_PhotoChoice>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('addPhotoTitle'.tr(), style: kBigTextStyle),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'addPhotoSubtitle'.tr(),
+                textAlign: TextAlign.center,
+                style: kTextStyle.copyWith(color: kInk.withValues(alpha: 0.55)),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_rounded, color: kAccent),
+              title: Text('takePhoto'.tr(), style: kTextStyle),
+              onTap: () => Navigator.pop(ctx, _PhotoChoice.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded, color: kAccent),
+              title: Text('chooseFromGallery'.tr(), style: kTextStyle),
+              onTap: () => Navigator.pop(ctx, _PhotoChoice.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite_border_rounded, color: kInk),
+              title: Text('saveWithoutPhoto'.tr(), style: kTextStyle),
+              onTap: () => Navigator.pop(ctx, _PhotoChoice.none),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null) return;
+    XFile? photo;
+    if (choice != _PhotoChoice.none) {
+      photo = await ImagePicker().pickImage(
+        source: choice == _PhotoChoice.camera
+            ? ImageSource.camera
+            : ImageSource.gallery,
+        maxWidth: 1280,
+        imageQuality: 80,
+      );
+      // Cancelling the picker cancels saving too.
+      if (photo == null) return;
+    }
+    data.setFavoriteId(await favorites.add(data.answer, photo: photo));
   }
 
   @override
@@ -148,22 +228,11 @@ class _RecipeScreenState extends State<RecipeScreen> {
                       spacing: 12,
                       children: [
                         ElevatedButton(
-                            onPressed: () => Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (context) =>
-                                const MainScreen())),
+                            onPressed: () => Navigator.pop(context),
                             child: Text('back'.tr(), style: kTextStyle,)
                         ),
                         ElevatedButton.icon(
-                          onPressed: () async {
-                            final favorites = context.read<FavoritesProvider>();
-                            final id = data.favoriteId;
-                            if (id == null) {
-                              data.setFavoriteId(await favorites.add(recipe));
-                            } else {
-                              await favorites.remove(id);
-                              data.setFavoriteId(null);
-                            }
-                          },
+                          onPressed: () => _toggleFavorite(context, data),
                           icon: Icon(
                             data.favoriteId == null
                                 ? Icons.favorite_border_rounded
