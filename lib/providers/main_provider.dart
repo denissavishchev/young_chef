@@ -12,7 +12,6 @@ import '../screens/recipe_screen.dart';
 import '../widgets/language.dart';
 
 class MainProvider with ChangeNotifier {
-
   TextEditingController questionController = TextEditingController();
   TextEditingController allergiesController = TextEditingController();
   TextEditingController notLikeController = TextEditingController();
@@ -26,15 +25,16 @@ class MainProvider with ChangeNotifier {
 
   bool isLoading = false;
   RecipeResponse answer = RecipeResponse(
-      recipeName: '',
-      ingredients: [],
-      instructions: [],
-      calories: '',
-      protein: '',
-      carbohydrates: '',
-      fat: '',
-      developerInfo: '');
-  
+    recipeName: '',
+    ingredients: [],
+    instructions: [],
+    calories: '',
+    protein: '',
+    carbohydrates: '',
+    fat: '',
+    developerInfo: '',
+  );
+
   /// Key of the current [answer] in the favorites box, null if not saved.
   String? favoriteId;
 
@@ -53,15 +53,14 @@ class MainProvider with ChangeNotifier {
     apiKey: dotenv.env['GOOGLE_AI_STUDIO_KEY'].toString(),
   );
 
-  Future<void> getRecipe(BuildContext context)async {
+  Future<void> getRecipe(BuildContext context) async {
     isLoading = true;
     notifyListeners();
     Locale myLocale = Localizations.localeOf(context);
     String language = myLocale.languageCode;
     final prompt = [
       Content.multi([
-        TextPart(
-          '''
+        TextPart('''
           Jesteś doświadczonym doradcą kulinarnym, który tworzy przepisy specjalnie dla nastolatków.
 
             Na podstawie podanych produktów: ${questionController.text}
@@ -70,15 +69,11 @@ class MainProvider with ChangeNotifier {
           
             Dodatkowe parametry, które MUSISZ uwzględnić:
           
-            - Źródło składników: ${onlyUserIngredients
-              ? "Użyj WYŁĄCZNIE podanych produktów. Nie dodawaj żadnych innych składników, łącznie z solą, pieprzem czy oliwą, jeśli nie zostały wymienione."
-              : "Bazuj przede wszystkim na podanych produktach. Możesz dodać podstawowe składniki uzupełniające typu sól, pieprz, oliwa, przyprawy, jeśli są potrzebne — ale nie dodawaj nowych głównych składników (np. dodatkowego mięsa, nabiału czy warzyw, których nie ma na liście)."}
+            - Źródło składników: ${onlyUserIngredients ? "Użyj WYŁĄCZNIE podanych produktów. Nie dodawaj żadnych innych składników, łącznie z solą, pieprzem czy oliwą, jeśli nie zostały wymienione." : "Bazuj przede wszystkim na podanych produktach. Możesz dodać podstawowe składniki uzupełniające typu sól, pieprz, oliwa, przyprawy, jeśli są potrzebne — ale nie dodawaj nowych głównych składników (np. dodatkowego mięsa, nabiału czy warzyw, których nie ma na liście)."}
           
             - Kaloryczność: Całe danie powinno mieścić się w zakresie od ${caloriesRange.start} do ${caloriesRange.end} kcal.
           
-            - Typ diety: ${isRegularDiet
-              ? "Standardowa, zbalansowana dieta nastolatka."
-              : "Dieta dopasowana do potrzeb młodego sportowca / dnia treningowego — uwzględnij odpowiednią podaż białka i węglowodanów wspierających regenerację i energię."}
+            - Typ diety: ${isRegularDiet ? "Standardowa, zbalansowana dieta nastolatka." : "Dieta dopasowana do potrzeb młodego sportowca / dnia treningowego — uwzględnij odpowiednią podaż białka i węglowodanów wspierających regenerację i energię."}
           
             - Płeć osoby, dla której przygotowywany jest przepis: ${isBoy ? "chłopak" : "dziewczynka"} (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie).
           
@@ -126,8 +121,7 @@ class MainProvider with ChangeNotifier {
           
             Odpowiedz wyłącznie w języku: $language
             Nie dodawaj żadnego tekstu poza samym obiektem JSON.
-          ''',
-        ),
+          '''),
       ]),
     ];
     try {
@@ -152,15 +146,17 @@ class MainProvider with ChangeNotifier {
         log(answer.instructions.toString());
         log(answer.developerInfo);
         if (!context.mounted) return;
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) =>
-            const RecipeScreen()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const RecipeScreen()),
+        );
       } else {
         throw Exception('empty response');
       }
     } catch (e) {
       log('Gemini error: $e');
-      if (e.toString().contains('503') || e.toString().contains('UNAVAILABLE')) {
+      if (e.toString().contains('503') ||
+          e.toString().contains('UNAVAILABLE')) {
         answerError = 'Spróbuj ponownie';
       } else {
         answerError = 'Spróbuj ponownie';
@@ -199,8 +195,9 @@ class MainProvider with ChangeNotifier {
       final products = (response.text ?? '').trim().replaceAll('\n', ', ');
       if (products.isEmpty) return false;
       final current = questionController.text.trim();
-      questionController.text =
-          current.isEmpty ? products : '$current, $products';
+      questionController.text = current.isEmpty
+          ? products
+          : '$current, $products';
       return true;
     } catch (e) {
       log('Scan error: $e');
@@ -216,19 +213,19 @@ class MainProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setLanguage(AppLanguage value, context){
+  void setLanguage(AppLanguage value, context) {
     selectedLanguage = value.toString();
     notifyListeners();
   }
 
-  void setOnlyUserIngredients(bool? value) async{
+  void setOnlyUserIngredients(bool? value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     onlyUserIngredients = value ?? false;
     await prefs.setBool('onlyUserIngredients', onlyUserIngredients);
     notifyListeners();
   }
 
-  void setCaloriesRange(RangeValues value) async{
+  void setCaloriesRange(RangeValues value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     caloriesRange = value;
     await prefs.setDouble('caloriesRangeStart', value.start);
@@ -236,61 +233,64 @@ class MainProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setRegularOrSportDiet(bool? value) async{
+  void setRegularOrSportDiet(bool? value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     isRegularDiet = value ?? false;
     await prefs.setBool('isRegularDiet', isRegularDiet);
     notifyListeners();
   }
 
-  void setBoyOrGirl(bool? value) async{
+  void setBoyOrGirl(bool? value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     isBoy = value ?? false;
     await prefs.setBool('isBoy', isBoy);
     notifyListeners();
   }
 
-  void setTimeForCooking(double value) async{
+  void setTimeForCooking(double value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     timeForCooking = value;
     await prefs.setDouble('timeForCooking', timeForCooking);
     notifyListeners();
   }
 
-  void setCookingSkillLevel(double value) async{
+  void setCookingSkillLevel(double value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     cookingSkillLevel = value;
     await prefs.setDouble('cookingSkillLevel', cookingSkillLevel);
     notifyListeners();
   }
 
-  void setAllergies(String value) async{
+  void setAllergies(String value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('allergies', value);
     notifyListeners();
   }
 
-  void setNotLikes(String value) async{
+  void setNotLikes(String value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('notLikes', value);
     notifyListeners();
   }
 
-  void setIsVegan(bool? value) async{
+  void setIsVegan(bool? value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     isVegan = value ?? false;
     prefs.setBool('isVegan', isVegan);
     notifyListeners();
   }
 
-  void getValuesFromMemory() async{
+  void getValuesFromMemory() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     onlyUserIngredients = prefs.getBool('onlyUserIngredients') ?? true;
     isBoy = prefs.getBool('isBoy') ?? true;
     cookingSkillLevel = prefs.getDouble('cookingSkillLevel') ?? 1;
     allergiesController.text = prefs.getString('allergies') ?? '';
     notLikeController.text = prefs.getString('notLikes') ?? '';
-    caloriesRange = RangeValues(prefs.getDouble('caloriesRangeStart') ?? 100, prefs.getDouble('caloriesRangeEnd') ?? 1000);
+    caloriesRange = RangeValues(
+      prefs.getDouble('caloriesRangeStart') ?? 100,
+      prefs.getDouble('caloriesRangeEnd') ?? 1000,
+    );
     isRegularDiet = prefs.getBool('isRegularDiet') ?? true;
     timeForCooking = prefs.getDouble('timeForCooking') ?? 10;
     isVegan = prefs.getBool('isVegan') ?? false;
@@ -338,6 +338,4 @@ class MainProvider with ChangeNotifier {
     notifyListeners();
     log('Zapisany tekst: ${questionController.text}');
   }
-
 }
-

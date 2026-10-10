@@ -8,6 +8,13 @@ import '../../providers/main_provider.dart';
 import '../../providers/timer_provider.dart';
 import '../constants.dart';
 
+final _text = kTextStyle.copyWith(color: kLine);
+final _heading = kBigTextStyle.copyWith(color: kLine, fontSize: 18);
+final _title = kBigTextStyle.copyWith(color: kLine);
+
+BoxDecoration _outline({double radius = 28, Color color = kBg}) =>
+    outlineDecoration(radius: radius, color: color);
+
 enum _PhotoChoice { camera, gallery, none }
 
 class RecipeScreen extends StatefulWidget {
@@ -27,13 +34,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
     RecipeScreen.isOpen = true;
   }
 
-  final PageController _pageController = PageController(viewportFraction: 0.92);
-  int _currentPage = 0;
-
   @override
   void dispose() {
     RecipeScreen.isOpen = false;
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -53,7 +56,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: Text('remove'.tr(), style: const TextStyle(color: kAccent)),
+              child: Text('remove'.tr(), style: _text),
             ),
           ],
         ),
@@ -65,6 +68,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
     }
     final choice = await showModalBottomSheet<_PhotoChoice>(
       context: context,
+      backgroundColor: kBg,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
         child: Column(
@@ -77,22 +81,34 @@ class _RecipeScreenState extends State<RecipeScreen> {
               child: Text(
                 'addPhotoSubtitle'.tr(),
                 textAlign: TextAlign.center,
-                style: kTextStyle.copyWith(color: kInk.withValues(alpha: 0.55)),
+                style: _text.copyWith(color: kLine.withValues(alpha: 0.55)),
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.photo_camera_rounded, color: kAccent),
-              title: Text('takePhoto'.tr(), style: kTextStyle),
+              leading: const Icon(
+                shadows: kIconShadow,
+                Icons.photo_camera_rounded,
+                color: kLine,
+              ),
+              title: Text('takePhoto'.tr(), style: _text),
               onTap: () => Navigator.pop(ctx, _PhotoChoice.camera),
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_rounded, color: kAccent),
-              title: Text('chooseFromGallery'.tr(), style: kTextStyle),
+              leading: const Icon(
+                shadows: kIconShadow,
+                Icons.photo_library_rounded,
+                color: kLine,
+              ),
+              title: Text('chooseFromGallery'.tr(), style: _text),
               onTap: () => Navigator.pop(ctx, _PhotoChoice.gallery),
             ),
             ListTile(
-              leading: const Icon(Icons.favorite_border_rounded, color: kInk),
-              title: Text('saveWithoutPhoto'.tr(), style: kTextStyle),
+              leading: const Icon(
+                shadows: kIconShadow,
+                Icons.favorite_border_rounded,
+                color: kLine,
+              ),
+              title: Text('saveWithoutPhoto'.tr(), style: _text),
               onTap: () => Navigator.pop(ctx, _PhotoChoice.none),
             ),
           ],
@@ -115,342 +131,305 @@ class _RecipeScreenState extends State<RecipeScreen> {
     data.setFavoriteId(await favorites.add(data.answer, photo: photo));
   }
 
+  Future<void> _pickDuration(BuildContext context, String name) async {
+    final timer = context.read<TimerProvider>();
+    final minutes = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: kBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        side: BorderSide(color: kLine, width: kLineWidth),
+      ),
+      builder: (_) => const _TimerPickerSheet(),
+    );
+    if (minutes != null) {
+      await timer.start(Duration(minutes: minutes), name);
+    }
+  }
+
+  /// Main timer action: start / pause / resume / dismiss, by current state.
+  void _timerAction(TimerProvider timer, String name) {
+    switch (timer.status) {
+      case TimerStatus.idle:
+        _pickDuration(context, name);
+      case TimerStatus.running:
+        timer.pause();
+      case TimerStatus.paused:
+        timer.resume();
+      case TimerStatus.finished:
+        timer.stop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: true,
-        body: Consumer<MainProvider>(
-          builder: (context, data, _){
-            final recipe = data.answer;
-            final steps = recipe.instructions;
-            final pageCount = 2 + steps.length;
-            return SafeArea(
-                child: Column(
-                  spacing: 12,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(recipe.recipeName, style: kBigTextStyle,),
+      backgroundColor: kBg,
+      resizeToAvoidBottomInset: true,
+      body: Consumer2<MainProvider, TimerProvider>(
+        builder: (context, data, timer, _) {
+          final recipe = data.answer;
+          final status = timer.status;
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Column(
+                spacing: 16,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    recipe.recipeName,
+                    style: _title.copyWith(fontSize: 28, height: 1.15),
+                  ),
+                  _RecipeCard(
+                    title: 'ingredients'.tr(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 6,
+                      children: [
+                        for (final item in recipe.ingredients)
+                          Text('–  $item', style: _text.copyWith(fontSize: 14)),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: List.generate(pageCount, (i) {
-                          final isActive = i <= _currentPage;
-                          return Expanded(
-                            child: Container(
-                              height: 3,
-                              margin: const EdgeInsets.symmetric(horizontal: 2),
-                              decoration: BoxDecoration(
-                                color: isActive
-                                    ? kOrange
-                                    : kLightBlue.withValues(alpha: 0.45),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.34,
-                      child: PageView.builder(
-                        controller: _pageController,
-                        itemCount: pageCount,
-                        onPageChanged: (index) {
-                          setState(() => _currentPage = index);
-                        },
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return _RecipeCard(
-                              child: Column(
-                                spacing: 8,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('ingredients'.tr(), style: kTextStyle,),
-                                  Expanded(
-                                    child: ListView.separated(
-                                      itemCount: recipe.ingredients.length,
-                                      separatorBuilder: (_, _) => const SizedBox(height: 4),
-                                      itemBuilder: (context, i) {
-                                        return Text(recipe.ingredients[i], style: kTextStyle,);
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                          if (index <= steps.length) {
-                            final stepIndex = index - 1;
-                            return _RecipeCard(
-                              child: Column(
-                                spacing: 8,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('${'instructions'.tr()} ${stepIndex + 1}/${steps.length}',
-                                    style: kTextStyle,
-                                  ),
-                                  Expanded(
-                                    child: SingleChildScrollView(
-                                      child: Text(steps[stepIndex], style: kTextStyle,),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                          return _RecipeCard(
-                            child: Column(
-                              spacing: 8,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _MacroRow(label: 'calories'.tr(), value: recipe.calories),
-                                _MacroRow(label: 'protein'.tr(), value: recipe.protein),
-                                _MacroRow(label: 'carbohydrates'.tr(), value: recipe.carbohydrates),
-                                _MacroRow(label: 'fat'.tr(), value: recipe.fat),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    _TimerSection(recipeName: recipe.recipeName),
-                    const Spacer(),
-                    Divider(color: kLightBlue,),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(data.answer.developerInfo.toString(), style: kTextStyle,),
-                    ),
-                    Divider(color: kLightBlue,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  ),
+                  _RecipeCard(
+                    title: 'instructions'.tr(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 12,
                       children: [
-                        ElevatedButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text('back'.tr(), style: kTextStyle,)
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () => _toggleFavorite(context, data),
-                          icon: Icon(
-                            data.favoriteId == null
-                                ? Icons.favorite_border_rounded
-                                : Icons.heart_broken_rounded,
-                            color: kOrange,
+                        for (var i = 0; i < recipe.instructions.length; i++)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 10,
+                            children: [
+                              Text(
+                                '${i + 1}.',
+                                style: _heading.copyWith(fontSize: 15),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  recipe.instructions[i],
+                                  style: _text.copyWith(
+                                    fontSize: 15,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          label: Text(
-                            data.favoriteId == null
-                                ? 'saveToFavorites'.tr()
-                                : 'removeFromFavorites'.tr(),
-                            style: kTextStyle.copyWith(color: kOrange),
+                      ],
+                    ),
+                  ),
+                  // Timer pill.
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    decoration: _outline(),
+                    child: Row(
+                      spacing: 12,
+                      children: [
+                        const Icon(
+                          Icons.alarm_rounded,
+                          size: 26,
+                          color: kLine,
+                          shadows: kIconShadow,
+                        ),
+                        Expanded(
+                          child: Text(
+                            switch (status) {
+                              TimerStatus.idle => 'setTimer'.tr(),
+                              TimerStatus.finished => 'timerDoneTitle'.tr(),
+                              _ => _formatTime(timer.remaining),
+                            },
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _heading,
+                          ),
+                        ),
+                        if (status != TimerStatus.idle &&
+                            status != TimerStatus.finished)
+                          GestureDetector(
+                            onTap: timer.stop,
+                            child: const Icon(
+                              Icons.stop_rounded,
+                              color: kLine,
+                              size: 30,
+                              shadows: kIconShadow,
+                            ),
+                          ),
+                        GestureDetector(
+                          onTap: () => _timerAction(timer, recipe.recipeName),
+                          child: Container(
+                            width: 56,
+                            height: 56,
+                            decoration: const BoxDecoration(
+                              color: kLine,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              switch (status) {
+                                TimerStatus.running => Icons.pause_rounded,
+                                TimerStatus.finished => Icons.stop_rounded,
+                                _ => Icons.play_arrow_rounded,
+                              },
+                              color: kBg,
+                              size: 30,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),);
-          },
-        )
+                  ),
+                  // Macros.
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: _outline(),
+                    child: Row(
+                      children: [
+                        _Macro('calories'.tr(), recipe.calories),
+                        _Macro('protein'.tr(), recipe.protein),
+                        _Macro('carbohydrates'.tr(), recipe.carbohydrates),
+                        _Macro('fat'.tr(), recipe.fat),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 16,
+                    children: [
+                      _IconSquare(
+                        icon: Icons.arrow_back_rounded,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      _IconSquare(
+                        icon: data.favoriteId == null
+                            ? Icons.favorite_border_rounded
+                            : Icons.heart_broken_rounded,
+                        onPressed: () => _toggleFavorite(context, data),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
 
-class _MacroRow extends StatelessWidget {
-  const _MacroRow({required this.label, required this.value});
+class _Macro extends StatelessWidget {
+  const _Macro(this.label, this.value);
 
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      spacing: 4,
-      children: [
-        Text(label, style: kTextStyle,),
-        Text(value, style: kTextStyle,),
-      ],
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _heading.copyWith(fontSize: 15),
+          ),
+          Text(
+            label.replaceAll(':', ''),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _text.copyWith(fontSize: 10),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Rounded outlined square with an icon, like the date tile in the mockup.
+class _IconSquare extends StatelessWidget {
+  const _IconSquare({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: _outline(radius: 20),
+        child: Icon(shadows: kIconShadow, icon, color: kLine, size: 28),
+      ),
     );
   }
 }
 
 class _RecipeCard extends StatelessWidget {
-  const _RecipeCard({required this.child});
+  const _RecipeCard({required this.title, required this.child});
 
+  final String title;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(8),
-      margin: const EdgeInsets.fromLTRB(6, 0, 6, 8),
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-              colors: [
-                kLightBlue,
-                kLightBlue,
-                kWhite
-              ],
-              stops: [0.4, 0.65, 1],
-              begin: Alignment.bottomLeft,
-              end: Alignment.topRight
-          ),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: kDarkBlue.withValues(alpha: 0.2), width: 1),
-          boxShadow: [
-            BoxShadow(
-                color: kDarkBlue.withValues(alpha: 0.4),
-                blurRadius: 5,
-                offset: const Offset(5, 3)
-            )
-          ]
+      padding: const EdgeInsets.all(20),
+      decoration: _outline(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 12,
+        children: [
+          Text(title, style: _heading),
+          child,
+        ],
       ),
-      child: child,
     );
   }
 }
 
-
-String _formatTime(Duration d) {
-  final m = d.inMinutes.toString().padLeft(2, '0');
-  final sec = (d.inSeconds % 60).toString().padLeft(2, '0');
-  return '$m:$sec';
-}
-
-class _TimerSection extends StatelessWidget {
-  const _TimerSection({required this.recipeName});
-
-  final String recipeName;
-
-  Future<void> _pickDuration(BuildContext context) async {
-    final timer = context.read<TimerProvider>();
-    final minutes = await showModalBottomSheet<int>(
-      context: context,
-      backgroundColor: kWhite,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => const _TimerPickerSheet(),
-    );
-    if (minutes != null) {
-      await timer.start(Duration(minutes: minutes), recipeName);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<TimerProvider>(
-      builder: (context, timer, _) {
-        final status = timer.status;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            spacing: 8,
-            children: [
-              if (status != TimerStatus.idle) ...[
-                Text(
-                  status == TimerStatus.finished
-                      ? 'timerDoneTitle'.tr()
-                      : _formatTime(timer.remaining),
-                  style: kBigTextStyle.copyWith(
-                    color: status == TimerStatus.finished ? kOrange : kDarkBlue,
-                  ),
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: timer.progress,
-                    minHeight: 6,
-                    color: kOrange,
-                    backgroundColor: kLightBlue.withValues(alpha: 0.45),
-                  ),
-                ),
-              ],
-              Row(
-                spacing: 12,
-                children: [
-                  if (status == TimerStatus.idle)
-                    Expanded(
-                      child: _TimerButton(
-                        icon: Icons.timer_outlined,
-                        label: 'setTimer'.tr(),
-                        onPressed: () => _pickDuration(context),
-                      ),
-                    ),
-                  if (status == TimerStatus.running)
-                    Expanded(
-                      child: _TimerButton(
-                        icon: Icons.pause_rounded,
-                        label: 'pauseTimer'.tr(),
-                        onPressed: timer.pause,
-                      ),
-                    ),
-                  if (status == TimerStatus.paused) ...[
-                    Expanded(
-                      child: _TimerButton(
-                        icon: Icons.stop_rounded,
-                        label: 'stopTimer'.tr(),
-                        filled: false,
-                        onPressed: timer.stop,
-                      ),
-                    ),
-                    Expanded(
-                      child: _TimerButton(
-                        icon: Icons.play_arrow_rounded,
-                        label: 'continueTimer'.tr(),
-                        onPressed: timer.resume,
-                      ),
-                    ),
-                  ],
-                  if (status == TimerStatus.finished)
-                    Expanded(
-                      child: _TimerButton(
-                        icon: Icons.stop_rounded,
-                        label: 'stopTimer'.tr(),
-                        onPressed: timer.stop,
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _TimerButton extends StatelessWidget {
-  const _TimerButton({
-    required this.icon,
+/// Outlined pill button; [filled] turns it solid dark.
+class _PillButton extends StatelessWidget {
+  const _PillButton({
     required this.label,
     required this.onPressed,
-    this.filled = true,
+    this.filled = false,
   });
 
-  final IconData icon;
   final String label;
   final VoidCallback onPressed;
   final bool filled;
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: filled ? Colors.white : kOrange),
-      label: Text(
-        label,
-        style: kTextStyle.copyWith(color: filled ? Colors.white : kOrange),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: filled ? kOrange : kWhite,
-        side: const BorderSide(color: kOrange),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    final fg = filled ? kBg : kLine;
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        decoration: _outline(radius: 24, color: filled ? kLine : kBg),
+        child: Text(label, style: _text.copyWith(color: fg)),
       ),
     );
   }
+}
+
+String _formatTime(Duration d) {
+  final m = d.inMinutes.toString().padLeft(2, '0');
+  final sec = (d.inSeconds % 60).toString().padLeft(2, '0');
+  return '$m:$sec';
 }
 
 class _TimerPickerSheet extends StatefulWidget {
@@ -480,7 +459,7 @@ class _TimerPickerSheetState extends State<_TimerPickerSheet> {
           mainAxisSize: MainAxisSize.min,
           spacing: 12,
           children: [
-            Text('setTimer'.tr(), style: kTextStyle),
+            Text('setTimer'.tr(), style: _text),
             SizedBox(
               height: 180,
               child: CupertinoPicker(
@@ -492,7 +471,7 @@ class _TimerPickerSheetState extends State<_TimerPickerSheet> {
                   (i) => Center(
                     child: Text(
                       '${i + 1} ${'timerMinutesShort'.tr()}',
-                      style: kTextStyle,
+                      style: _text,
                     ),
                   ),
                 ),
@@ -500,19 +479,10 @@ class _TimerPickerSheetState extends State<_TimerPickerSheet> {
             ),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: _PillButton(
+                label: 'startTimer'.tr(),
+                filled: true,
                 onPressed: () => Navigator.pop(context, _minutes),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kOrange,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Text(
-                  'startTimer'.tr(),
-                  style: kTextStyle.copyWith(color: Colors.white),
-                ),
               ),
             ),
           ],

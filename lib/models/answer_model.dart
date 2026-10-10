@@ -49,17 +49,17 @@ class RecipeResponse {
   }
 
   Map<String, dynamic> toMap() => {
-        'recipeName': recipeName,
-        'ingredients': ingredients,
-        'instructions': instructions,
-        'calories': calories,
-        'protein': protein,
-        'carbohydrates': carbohydrates,
-        'fat': fat,
-        'developerInfo': developerInfo,
-        'cookingTime': cookingTime,
-        'isVegan': isVegan,
-      };
+    'recipeName': recipeName,
+    'ingredients': ingredients,
+    'instructions': instructions,
+    'calories': calories,
+    'protein': protein,
+    'carbohydrates': carbohydrates,
+    'fat': fat,
+    'developerInfo': developerInfo,
+    'cookingTime': cookingTime,
+    'isVegan': isVegan,
+  };
 
   factory RecipeResponse.fromMap(Map<dynamic, dynamic> map) {
     return RecipeResponse(

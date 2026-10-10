@@ -160,7 +160,8 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         _inForeground = false;
       case AppLifecycleState.resumed:
         _inForeground = true;
-        final endedInBackground = _rangInBackground ||
+        final endedInBackground =
+            _rangInBackground ||
             (status == TimerStatus.running && remaining == Duration.zero);
         if (endedInBackground) {
           // The user came back (e.g. tapped the notification): silence the

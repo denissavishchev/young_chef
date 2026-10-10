@@ -10,8 +10,8 @@ class NotchNavItem {
   final IconData activeIcon;
 }
 
-/// Dark floating bar with a circular notch that flows under the selected
-/// item like a wave, carrying an accent bubble with the item's icon.
+/// Outlined floating bar with a circular notch that flows under the selected
+/// item like a wave, carrying an outlined ring with the item's icon.
 class NotchNavBar extends StatefulWidget {
   const NotchNavBar({
     super.key,
@@ -50,34 +50,33 @@ class _NotchNavBarState extends State<NotchNavBar> {
   Widget build(BuildContext context) {
     final items = widget.items;
     return Container(
-      color: kScreenBg,
+      color: Colors.transparent,
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            10,
-            NotchNavBar.lift + 8,
-            10,
-            12,
-          ),
+          padding: const EdgeInsets.fromLTRB(10, NotchNavBar.lift + 8, 10, 12),
           child: SizedBox(
             height: NotchNavBar.barHeight,
             child: LayoutBuilder(
               builder: (context, box) {
                 final mid = (items.length - 1) / 2;
-                double shift(double pos) => mid == 0
-                    ? 0
-                    : (pos - mid) / mid * NotchNavBar.edgeShift;
-                final itemW = (box.maxWidth - 2 * NotchNavBar.edgeInset) / items.length;
+                double shift(double pos) =>
+                    mid == 0 ? 0 : (pos - mid) / mid * NotchNavBar.edgeShift;
+                final itemW =
+                    (box.maxWidth - 2 * NotchNavBar.edgeInset) / items.length;
                 return AnimatedBuilder(
                   animation: widget.position,
                   builder: (context, _) {
-                    final t = widget.position.value.clamp(0.0, items.length - 1.0);
+                    final t = widget.position.value.clamp(
+                      0.0,
+                      items.length - 1.0,
+                    );
                     if ((t - _lastT).abs() > 1e-4) {
                       _dir = (t - _lastT).sign;
                       _lastT = t;
                     }
-                    final cx = NotchNavBar.edgeInset + itemW * (t + 0.5) + shift(t);
+                    final cx =
+                        NotchNavBar.edgeInset + itemW * (t + 0.5) + shift(t);
                     // 0 on a tab, 1 halfway between two tabs.
                     final wave = math.sin(math.pi * (t - t.floorToDouble()));
                     final dir = _dir;
@@ -91,7 +90,10 @@ class _NotchNavBarState extends State<NotchNavBar> {
                         ),
                         for (var i = 0; i < items.length; i++)
                           Positioned(
-                            left: NotchNavBar.edgeInset + itemW * i + shift(i.toDouble()),
+                            left:
+                                NotchNavBar.edgeInset +
+                                itemW * i +
+                                shift(i.toDouble()),
                             width: itemW,
                             top: 0,
                             bottom: 0,
@@ -102,28 +104,37 @@ class _NotchNavBarState extends State<NotchNavBar> {
                                 opacity: (t - i).abs().clamp(0.0, 1.0),
                                 child: Icon(
                                   items[i].icon,
-                                  color: Colors.white.withValues(alpha: 0.7),
+                                  color: kLine,
+                                  size: 28,
+                                  shadows: kIconShadow,
                                 ),
                               ),
                             ),
                           ),
                         Positioned(
                           left: cx - NotchNavBar.bubble / 2,
-                          top: NotchNavBar.bubbleCenterY -
+                          top:
+                              NotchNavBar.bubbleCenterY -
                               NotchNavBar.bubble / 2 -
                               3 * wave,
                           child: IgnorePointer(
                             child: Container(
                               width: NotchNavBar.bubble,
                               height: NotchNavBar.bubble,
-                              decoration: const BoxDecoration(
-                                color: kAccent,
+                              decoration: BoxDecoration(
+                                color: kBg,
                                 shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: kLine,
+                                  width: kLineWidth,
+                                ),
                               ),
                               child: Icon(
                                 items[t.round().clamp(0, items.length - 1)]
                                     .activeIcon,
-                                color: Colors.white,
+                                color: kLine,
+                                size: 28,
+                                shadows: kIconShadow,
                               ),
                             ),
                           ),
@@ -160,8 +171,10 @@ class _BarPainter extends CustomPainter {
     var left = baseFillet * (dir > 0 ? 1 + 3 * wave : 1 - 0.3 * wave);
     var right = baseFillet * (dir < 0 ? 1 + 3 * wave : 1 - 0.3 * wave);
 
-    final pl = Offset(cx + rx * math.cos(math.pi + phi),
-        cy + ry * math.sin(math.pi + phi));
+    final pl = Offset(
+      cx + rx * math.cos(math.pi + phi),
+      cy + ry * math.sin(math.pi + phi),
+    );
     final pr = Offset(cx + rx * math.cos(-phi), cy + ry * math.sin(-phi));
     final k = pl.dy / (ry * math.cos(phi));
     final ctrlL = Offset(pl.dx + rx * math.sin(phi) * k, 0);
@@ -189,11 +202,38 @@ class _BarPainter extends CustomPainter {
 
     final bar = Path()
       ..addRRect(
-        RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(NotchNavBar.cornerRadius)),
+        RRect.fromRectAndRadius(
+          Offset.zero & size,
+          const Radius.circular(NotchNavBar.cornerRadius),
+        ),
       );
+    final shape = Path.combine(PathOperation.difference, bar, notch);
+    // Keep the glow outside of the bar.
+    canvas.save();
+    canvas.clipPath(
+      Path.combine(
+        PathOperation.difference,
+        Path()..addRect(
+          Rect.fromLTWH(-100, -100, size.width + 200, size.height + 300),
+        ),
+        shape,
+      ),
+    );
     canvas.drawPath(
-      Path.combine(PathOperation.difference, bar, notch),
-      Paint()..color = kInk,
+      shape.shift(const Offset(0, 4)),
+      Paint()
+        ..color = kGlow.withValues(alpha: 0.8)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+    canvas.restore();
+    canvas.drawPath(shape, Paint()..color = kBg);
+    canvas.drawPath(
+      shape,
+      Paint()
+        ..color = kLine
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = kLineWidth
+        ..strokeJoin = StrokeJoin.round,
     );
   }
 

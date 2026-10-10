@@ -24,22 +24,23 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final title = kTextStyle.copyWith(color: kInk);
+    final title = kTextStyle.copyWith(color: kLine);
     final muted = kTextStyle.copyWith(
-      color: kInk.withValues(alpha: 0.55),
+      color: kLine.withValues(alpha: 0.55),
       fontWeight: FontWeight.w600,
     );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor: kScreenBg,
+        backgroundColor: kBg,
         resizeToAvoidBottomInset: true,
         body: Consumer<MainProvider>(
           builder: (context, data, _) {
             return Stack(
               children: [
                 SafeArea(
+                  bottom: false,
                   child: Column(
                     children: [
                       Padding(
@@ -48,9 +49,10 @@ class _MainScreenState extends State<MainScreen> {
                           spacing: 10,
                           children: [
                             const Icon(
+                              shadows: kIconShadow,
                               Icons.restaurant_rounded,
                               size: 28,
-                              color: kAccent,
+                              color: kLine,
                             ),
                             Expanded(
                               child: Column(
@@ -58,12 +60,9 @@ class _MainScreenState extends State<MainScreen> {
                                 children: [
                                   Text(
                                     'Young Chef',
-                                    style: kBigTextStyle.copyWith(color: kInk),
+                                    style: kBigTextStyle.copyWith(color: kLine),
                                   ),
-                                  Text(
-                                    'ingredients'.tr(),
-                                    style: muted,
-                                  ),
+                                  Text('ingredients'.tr(), style: muted),
                                 ],
                               ),
                             ),
@@ -79,262 +78,334 @@ class _MainScreenState extends State<MainScreen> {
                               horizontal: 14,
                               vertical: 10,
                             ),
-                            decoration: BoxDecoration(
-                              color: kAccentSoft,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                            decoration: outlineDecoration(radius: 16),
                             child: Text(
                               'tryAgainSoon'.tr(),
-                              style: kTextStyle.copyWith(
-                                color: kAccent,
-                              ),
+                              style: kTextStyle.copyWith(color: kLine),
                             ),
                           ),
                         ),
                       Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                          child: Column(
-                            spacing: 14,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.fromLTRB(20, 16, 12, 14),
-                                decoration: BoxDecoration(
-                                  color: kCard,
-                                  borderRadius: BorderRadius.circular(28),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 10,
-                                  children: [
-                                    Text('ingredients'.tr(), style: title),
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Expanded(
-                                          child: Stack(
-                                            children: [
-                                              TextFormField(
-                                                controller: data.questionController,
-                                                autovalidateMode:
-                                                    AutovalidateMode.onUserInteraction,
-                                                keyboardType: TextInputType.multiline,
-                                                cursorColor: kAccent,
-                                                maxLines: null,
-                                                minLines: 2,
-                                                style: kTextStyle.copyWith(
-                                                  color: kInk,
-                                                ),
-                                                decoration: InputDecoration(
-                                                  border: InputBorder.none,
-                                                  isDense: true,
-                                                  hintText: 'ingredientsHint'.tr(),
-                                                  hintStyle: kTextStyle.copyWith(
-                                                    color: kInk.withValues(alpha: 0.35),
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                validator: (value) {
-                                                  if (value == null || value.isEmpty) {
-                                                    return 'thisFieldCannotBeEmpty'.tr();
-                                                  }
-                                                  return null;
-                                                },
-                                              ),
-                                              if (data.isListening)
-                                                Positioned.fill(
-                                                  child: ColoredBox(
-                                                    color: kCard.withValues(alpha: 0.8),
-                                                    child: Center(
-                                                      child: SpinKitWave(
-                                                        color: kAccent,
-                                                        size: 28,
-                                                        itemCount: 7,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        GestureDetector(
-                                          onTap: data.isScanning
-                                              ? null
-                                              : () async {
-                                                  final messenger =
-                                                      ScaffoldMessenger.of(context);
-                                                  final ok =
-                                                      await data.scanIngredients(context);
-                                                  if (!ok) {
-                                                    messenger.showSnackBar(
-                                                      SnackBar(
-                                                        content: Text('scanFailed'.tr()),
-                                                      ),
-                                                    );
-                                                  }
-                                                },
-                                          child: Container(
-                                            width: 56,
-                                            height: 56,
-                                            decoration: const BoxDecoration(
-                                              color: kAccentSoft,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: data.isScanning
-                                                ? const Padding(
-                                                    padding: EdgeInsets.all(16),
-                                                    child: CircularProgressIndicator(
-                                                      strokeWidth: 3,
-                                                      color: kAccent,
-                                                    ),
-                                                  )
-                                                : const Icon(
-                                                    Icons.photo_camera_rounded,
-                                                    size: 28,
-                                                    color: kAccent,
-                                                  ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        GestureDetector(
-                                          onTapDown: (_) => data.startListening(context),
-                                          onTapUp: (_) => data.stopListening(),
-                                          onTapCancel: () => data.stopListening(),
-                                          child: AnimatedContainer(
-                                            duration: const Duration(milliseconds: 180),
-                                            width: 56,
-                                            height: 56,
-                                            decoration: BoxDecoration(
-                                              color: data.isListening
-                                                  ? kAccent
-                                                  : kAccentSoft,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.mic_rounded,
-                                              size: 28,
-                                              color: data.isListening
-                                                  ? Colors.white
-                                                  : kAccent,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                        child: Stack(
+                          children: [
+                            SingleChildScrollView(
+                              padding: EdgeInsets.fromLTRB(
+                                16,
+                                12,
+                                16,
+                                12 +
+                                    64 +
+                                    12 +
+                                    MediaQuery.paddingOf(context).bottom,
                               ),
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
-                                decoration: BoxDecoration(
-                                  color: kCard,
-                                  borderRadius: BorderRadius.circular(28),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 16,
-                                  children: [
-                                    Text('recipeOptions'.tr(), style: title),
-                                    _OptionBlock(
-                                      title: 'caloriesLabel'.tr(),
-                                      value:
-                                          '${data.caloriesRange.start.round()}–${data.caloriesRange.end.round()} ${'kcalUnit'.tr()}',
-                                      titleStyle: muted,
-                                      child: SliderTheme(
-                                        data: _sliderTheme(),
-                                        child: RangeSlider(
-                                          padding: const EdgeInsets.symmetric(vertical: 4),
-                                          values: data.caloriesRange,
-                                          min: 100,
-                                          max: 1000,
-                                          divisions: 10,
-                                          labels: RangeLabels(
-                                            data.caloriesRange.start.round().toString(),
-                                            data.caloriesRange.end.round().toString(),
-                                          ),
-                                          onChanged: (range) =>
-                                              data.setCaloriesRange(range),
-                                        ),
-                                      ),
+                              child: Column(
+                                spacing: 14,
+                                children: [
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      16,
+                                      12,
+                                      14,
                                     ),
-                                    _OptionBlock(
-                                      title: 'timeLabel'.tr(),
-                                      value:
-                                          '${data.timeForCooking.toInt()} ${'minUnit'.tr()}',
-                                      titleStyle: muted,
-                                      child: SliderTheme(
-                                        data: _sliderTheme(),
-                                        child: Slider(
-                                          padding: const EdgeInsets.symmetric(vertical: 4),
-                                          value: data.timeForCooking,
-                                          min: 10,
-                                          max: 60,
-                                          divisions: 5,
-                                          onChanged: (v) => data.setTimeForCooking(v),
-                                        ),
-                                      ),
-                                    ),
-                                    Row(
+                                    decoration: outlineDecoration(),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       spacing: 10,
                                       children: [
-                                        _Chip(
-                                          label: 'sportDiet'.tr(),
-                                          selected: !data.isRegularDiet,
-                                          onTap: () =>
-                                              data.setRegularOrSportDiet(false),
-                                        ),
-                                        _Chip(
-                                          label: 'regularDiet'.tr(),
-                                          selected: data.isRegularDiet,
-                                          onTap: () =>
-                                              data.setRegularOrSportDiet(true),
+                                        Text('ingredients'.tr(), style: title),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Expanded(
+                                              child: Stack(
+                                                children: [
+                                                  TextFormField(
+                                                    controller:
+                                                        data.questionController,
+                                                    autovalidateMode:
+                                                        AutovalidateMode
+                                                            .onUserInteraction,
+                                                    keyboardType:
+                                                        TextInputType.multiline,
+                                                    cursorColor: kLine,
+                                                    maxLines: null,
+                                                    minLines: 2,
+                                                    style: kTextStyle.copyWith(
+                                                      color: kLine,
+                                                    ),
+                                                    decoration: InputDecoration(
+                                                      border: InputBorder.none,
+                                                      isDense: true,
+                                                      hintText:
+                                                          'ingredientsHint'
+                                                              .tr(),
+                                                      hintStyle: kTextStyle
+                                                          .copyWith(
+                                                            color: kLine
+                                                                .withValues(
+                                                                  alpha: 0.35,
+                                                                ),
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                    ),
+                                                    validator: (value) {
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return 'thisFieldCannotBeEmpty'
+                                                            .tr();
+                                                      }
+                                                      return null;
+                                                    },
+                                                  ),
+                                                  if (data.isListening)
+                                                    Positioned.fill(
+                                                      child: ColoredBox(
+                                                        color: kBg.withValues(
+                                                          alpha: 0.8,
+                                                        ),
+                                                        child: Center(
+                                                          child: SpinKitWave(
+                                                            color: kLine,
+                                                            size: 28,
+                                                            itemCount: 7,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            GestureDetector(
+                                              onTap: data.isScanning
+                                                  ? null
+                                                  : () async {
+                                                      final messenger =
+                                                          ScaffoldMessenger.of(
+                                                            context,
+                                                          );
+                                                      final ok = await data
+                                                          .scanIngredients(
+                                                            context,
+                                                          );
+                                                      if (!ok) {
+                                                        messenger.showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              'scanFailed'.tr(),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+                                                    },
+                                              child: Container(
+                                                width: 56,
+                                                height: 56,
+                                                decoration: outlineDecoration(
+                                                  circle: true,
+                                                ),
+                                                child: data.isScanning
+                                                    ? const Padding(
+                                                        padding: EdgeInsets.all(
+                                                          16,
+                                                        ),
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                              strokeWidth: 3,
+                                                              color: kLine,
+                                                            ),
+                                                      )
+                                                    : const Icon(
+                                                        shadows: kIconShadow,
+                                                        Icons
+                                                            .photo_camera_rounded,
+                                                        size: 28,
+                                                        color: kLine,
+                                                      ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            GestureDetector(
+                                              onTapDown: (_) =>
+                                                  data.startListening(context),
+                                              onTapUp: (_) =>
+                                                  data.stopListening(),
+                                              onTapCancel: () =>
+                                                  data.stopListening(),
+                                              child: AnimatedContainer(
+                                                duration: const Duration(
+                                                  milliseconds: 180,
+                                                ),
+                                                width: 56,
+                                                height: 56,
+                                                decoration: outlineDecoration(
+                                                  circle: true,
+                                                  color: data.isListening
+                                                      ? kLine
+                                                      : kBg,
+                                                ),
+                                                child: Icon(
+                                                  Icons.mic_rounded,
+                                                  shadows: data.isListening
+                                                      ? null
+                                                      : kIconShadow,
+                                                  size: 28,
+                                                  color: data.isListening
+                                                      ? kBg
+                                                      : kLine,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                    _Chip(
-                                      label: 'isVegan'.tr(),
-                                      selected: data.isVegan,
-                                      onTap: () => data.setIsVegan(!data.isVegan),
+                                  ),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      16,
+                                      20,
+                                      18,
                                     ),
-                                  ],
-                                ),
+                                    decoration: outlineDecoration(),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      spacing: 16,
+                                      children: [
+                                        Text(
+                                          'recipeOptions'.tr(),
+                                          style: title,
+                                        ),
+                                        _OptionBlock(
+                                          title: 'caloriesLabel'.tr(),
+                                          value:
+                                              '${data.caloriesRange.start.round()}–${data.caloriesRange.end.round()} ${'kcalUnit'.tr()}',
+                                          titleStyle: muted,
+                                          child: SliderTheme(
+                                            data: _sliderTheme(),
+                                            child: RangeSlider(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 4,
+                                                  ),
+                                              values: data.caloriesRange,
+                                              min: 100,
+                                              max: 1000,
+                                              divisions: 10,
+                                              labels: RangeLabels(
+                                                data.caloriesRange.start
+                                                    .round()
+                                                    .toString(),
+                                                data.caloriesRange.end
+                                                    .round()
+                                                    .toString(),
+                                              ),
+                                              onChanged: (range) =>
+                                                  data.setCaloriesRange(range),
+                                            ),
+                                          ),
+                                        ),
+                                        _OptionBlock(
+                                          title: 'timeLabel'.tr(),
+                                          value:
+                                              '${data.timeForCooking.toInt()} ${'minUnit'.tr()}',
+                                          titleStyle: muted,
+                                          child: SliderTheme(
+                                            data: _sliderTheme(),
+                                            child: Slider(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 4,
+                                                  ),
+                                              value: data.timeForCooking,
+                                              min: 10,
+                                              max: 60,
+                                              divisions: 5,
+                                              onChanged: (v) =>
+                                                  data.setTimeForCooking(v),
+                                            ),
+                                          ),
+                                        ),
+                                        Row(
+                                          spacing: 10,
+                                          children: [
+                                            _Chip(
+                                              label: 'sportDiet'.tr(),
+                                              selected: !data.isRegularDiet,
+                                              onTap: () => data
+                                                  .setRegularOrSportDiet(false),
+                                            ),
+                                            _Chip(
+                                              label: 'regularDiet'.tr(),
+                                              selected: data.isRegularDiet,
+                                              onTap: () => data
+                                                  .setRegularOrSportDiet(true),
+                                            ),
+                                          ],
+                                        ),
+                                        _Chip(
+                                          label: 'isVegan'.tr(),
+                                          selected: data.isVegan,
+                                          onTap: () =>
+                                              data.setIsVegan(!data.isVegan),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                        child: GestureDetector(
-                          onTap: () => data.getRecipe(context),
-                          child: Container(
-                            width: double.infinity,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: kAccent,
-                              borderRadius: BorderRadius.circular(32),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              spacing: 10,
-                              children: [
-                                Text(
-                                  'createRecipe'.tr(),
-                                  style: kTextStyle.copyWith(
-                                    color: Colors.white,
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: MediaQuery.paddingOf(context).bottom,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  0,
+                                  16,
+                                  12,
+                                ),
+                                child: GestureDetector(
+                                  onTap: () => data.getRecipe(context),
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 64,
+                                    decoration: outlineDecoration(
+                                      radius: 32,
+                                      color: kLine,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      spacing: 10,
+                                      children: [
+                                        Text(
+                                          'createRecipe'.tr(),
+                                          style: kTextStyle.copyWith(
+                                            color: kBg,
+                                          ),
+                                        ),
+                                        const Icon(
+                                          Icons.cookie_rounded,
+                                          size: 24,
+                                          color: kBg,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                const Icon(
-                                  Icons.cookie_rounded,
-                                  size: 24,
-                                  color: Colors.white,
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ],
@@ -343,9 +414,9 @@ class _MainScreenState extends State<MainScreen> {
                 if (data.isLoading)
                   Positioned.fill(
                     child: ColoredBox(
-                      color: kScreenBg.withValues(alpha: 0.94),
+                      color: kBg.withValues(alpha: 0.94),
                       child: Center(
-                        child: const CircularProgressIndicator(color: kAccent),
+                        child: const CircularProgressIndicator(color: kLine),
                       ),
                     ),
                   ),
@@ -357,27 +428,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  SliderThemeData _sliderTheme() {
-    return SliderThemeData(
-      trackHeight: 8,
-      thumbColor: kAccent,
-      rangeThumbShape: const RoundRangeSliderThumbShape(
-        enabledThumbRadius: 11,
-      ),
-      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 11),
-      activeTrackColor: kAccent,
-      inactiveTrackColor: kTrackMuted,
-      rangeTickMarkShape: const RoundRangeSliderTickMarkShape(
-        tickMarkRadius: 0,
-      ),
-      tickMarkShape: SliderTickMarkShape.noTickMark,
-      activeTickMarkColor: Colors.transparent,
-      inactiveTickMarkColor: Colors.transparent,
-      valueIndicatorColor: kInk,
-      showValueIndicator: ShowValueIndicator.onDrag,
-      overlayColor: kAccent.withValues(alpha: 0.12),
-    );
-  }
+  SliderThemeData _sliderTheme() => outlineSliderTheme();
 }
 
 class _OptionBlock extends StatelessWidget {
@@ -404,7 +455,7 @@ class _OptionBlock extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: kInk,
+                color: kLine,
                 borderRadius: BorderRadius.circular(40),
               ),
               child: Text(
@@ -438,16 +489,16 @@ class _Chip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-        decoration: BoxDecoration(
-          color: selected ? kAccent : kInk,
-          borderRadius: BorderRadius.circular(20),
+        decoration: outlineDecoration(
+          radius: 20,
+          color: selected ? kLine : kBg,
         ),
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: kTextStyle.copyWith(
-            color: Colors.white,
+            color: selected ? kBg : kLine,
             fontWeight: FontWeight.w700,
           ),
         ),

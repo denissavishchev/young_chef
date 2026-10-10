@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 
 class FlagWidget extends StatelessWidget {
-  const FlagWidget({
-    super.key, required this.country,
-  });
+  const FlagWidget({super.key, required this.country});
 
   final String country;
 
@@ -13,23 +11,13 @@ class FlagWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: kWhite),
-        boxShadow: [
-          BoxShadow(
-            color: kWhite,
-            blurRadius: 0.5,
-            spreadRadius: 0.5,
-          )
-        ],
-        borderRadius: BorderRadius.all(Radius.circular(8))
+        border: Border.all(color: kBg),
+        boxShadow: [BoxShadow(color: kBg, blurRadius: 0.5, spreadRadius: 0.5)],
+        borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
       child: CountryFlag.fromCountryCode(
         country,
-        theme: ImageTheme(
-          height: 36,
-          width: 46,
-          shape: RoundedRectangle(8),
-        ),
+        theme: ImageTheme(height: 36, width: 46, shape: RoundedRectangle(8)),
       ),
     );
   }

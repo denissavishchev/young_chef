@@ -28,14 +28,12 @@ class LanguageWidget extends StatelessWidget {
     return Consumer<MainProvider>(
       builder: (context, data, _) {
         return PopupMenuButton<AppLanguage>(
-          constraints: const BoxConstraints(
-            maxWidth: 150,
-          ),
-          color: kWhite,
-          elevation: 4,
+          constraints: const BoxConstraints(maxWidth: 150),
+          color: kBg,
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: kDarkBlue.withValues(alpha: 0.2), width: 1),
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: kLine, width: kLineWidth),
           ),
           child: FlagWidget(
             country: context.locale.toString() == 'en_US'
@@ -56,7 +54,9 @@ class LanguageWidget extends StatelessWidget {
             }
           },
           itemBuilder: (context) {
-            return languageList.map<PopupMenuEntry<AppLanguage>>((valueLanguage) {
+            return languageList.map<PopupMenuEntry<AppLanguage>>((
+              valueLanguage,
+            ) {
               return PopupMenuItem<AppLanguage>(
                 value: valueLanguage,
                 child: Row(

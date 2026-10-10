@@ -7,7 +7,11 @@ import 'package:path_provider/path_provider.dart';
 import '../models/answer_model.dart';
 
 class FavoriteRecipe {
-  const FavoriteRecipe({required this.id, required this.recipe, this.photoPath});
+  const FavoriteRecipe({
+    required this.id,
+    required this.recipe,
+    this.photoPath,
+  });
 
   final String id;
   final RecipeResponse recipe;

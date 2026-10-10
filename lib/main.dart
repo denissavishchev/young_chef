@@ -19,7 +19,10 @@ void _openRecipeFromNotification() {
   final context = navigatorKey.currentContext;
   if (navigator == null || context == null || RecipeScreen.isOpen) return;
   // After a cold start the recipe is gone, so there is nothing to open.
-  if (Provider.of<MainProvider>(context, listen: false).answer.recipeName.isEmpty) {
+  if (Provider.of<MainProvider>(
+    context,
+    listen: false,
+  ).answer.recipeName.isEmpty) {
     return;
   }
   navigator.pushAndRemoveUntil(
@@ -40,7 +43,8 @@ void main() async {
   await Alarm.init();
   await Hive.initFlutter();
   await Hive.openBox(FavoritesProvider.boxName);
-  runApp(EasyLocalization(
+  runApp(
+    EasyLocalization(
       supportedLocales: const [
         Locale('en', 'US'),
         Locale('pl', 'PL'),
@@ -49,22 +53,30 @@ void main() async {
       path: 'assets/translations',
       fallbackLocale: const Locale('en', 'US'),
       child: MultiProvider(
-          providers: [
-            ChangeNotifierProvider<MainProvider>(create: (_) => MainProvider()),
-            ChangeNotifierProvider<FavoritesProvider>(create: (_) => FavoritesProvider()),
-            ChangeNotifierProvider<TimerProvider>(create: (_) => TimerProvider(onOpenRecipe: _openRecipeFromNotification)),
-          ],
-          builder: (context, child) {
-            return ScreenUtilInit(
-              designSize: const Size(360, 780),
-              builder: (_, child) => MaterialApp(
-                navigatorKey: navigatorKey,
-                debugShowCheckedModeBanner: false,
-                localizationsDelegates: context.localizationDelegates,
-                supportedLocales: context.supportedLocales,
-                locale: context.locale,
-                home: const HomeShell(),
-              ),
-            );
-          })));
+        providers: [
+          ChangeNotifierProvider<MainProvider>(create: (_) => MainProvider()),
+          ChangeNotifierProvider<FavoritesProvider>(
+            create: (_) => FavoritesProvider(),
+          ),
+          ChangeNotifierProvider<TimerProvider>(
+            create: (_) =>
+                TimerProvider(onOpenRecipe: _openRecipeFromNotification),
+          ),
+        ],
+        builder: (context, child) {
+          return ScreenUtilInit(
+            designSize: const Size(360, 780),
+            builder: (_, child) => MaterialApp(
+              navigatorKey: navigatorKey,
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: context.supportedLocales,
+              locale: context.locale,
+              home: const HomeShell(),
+            ),
+          );
+        },
+      ),
+    ),
+  );
 }

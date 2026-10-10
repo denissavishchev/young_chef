@@ -31,14 +31,15 @@ class _HomeShellState extends State<HomeShell> {
   }
 
   void _select(int i) => _pages.animateToPage(
-        i,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOutCubic,
-      );
+    i,
+    duration: const Duration(milliseconds: 500),
+    curve: Curves.easeOutCubic,
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: PageView(
         controller: _pages,
         children: const [
@@ -51,7 +52,10 @@ class _HomeShellState extends State<HomeShell> {
         position: _position,
         onSelected: _select,
         items: const [
-          NotchNavItem(icon: Icons.home_outlined, activeIcon: Icons.home_rounded),
+          NotchNavItem(
+            icon: Icons.home_outlined,
+            activeIcon: Icons.home_rounded,
+          ),
           NotchNavItem(
             icon: Icons.restaurant_menu_outlined,
             activeIcon: Icons.restaurant_menu_rounded,
