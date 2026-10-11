@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:young_chef/providers/favorites_provider.dart';
 import 'package:young_chef/providers/main_provider.dart';
+import 'package:young_chef/providers/product_provider.dart';
 import 'package:young_chef/providers/timer_provider.dart';
 import 'package:alarm/alarm.dart';
 import 'screens/home_shell.dart';
@@ -55,6 +56,9 @@ void main() async {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider<MainProvider>(create: (_) => MainProvider()),
+          ChangeNotifierProvider<ProductProvider>(
+            create: (_) => ProductProvider(),
+          ),
           ChangeNotifierProvider<FavoritesProvider>(
             create: (_) => FavoritesProvider(),
           ),

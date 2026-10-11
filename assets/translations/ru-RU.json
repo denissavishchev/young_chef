@@ -53,5 +53,18 @@
   "remove": "Удалить",
   "navHome": "Избранное",
   "navCreate": "Создать рецепт",
-  "navSettings": "Настройки"
+  "navSettings": "Настройки",
+  "navProduct": "Продукт",
+  "productTitle": "О продукте",
+  "productSubtitle": "Узнай больше о продукте",
+  "productLabel": "Продукт",
+  "productHint": "например, авокадо",
+  "productAnalyze": "Расскажи больше",
+  "productAbout": "Что это",
+  "productProsCons": "Плюсы и минусы",
+  "productPros": "Плюсы",
+  "productCons": "Минусы",
+  "productUseful": "Чем полезен",
+  "productNutrition": "На 100 г",
+  "fiber": "Клетчатка:"
 }

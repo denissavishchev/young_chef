@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+<defs>
+<linearGradient id="wg" gradientUnits="userSpaceOnUse" x1="300" y1="180" x2="720" y2="880">
+<stop offset="0" stop-color="#FFFFFF"/>
+<stop offset=".5" stop-color="#FFE066"/>
+<stop offset="1" stop-color="#FFFFFF"/>
+</linearGradient>
+</defs>
+<rect width="1024" height="1024" fill="#FF8210"/>
+<path d="M200 735 H824 V790 Q824 860 754 860 H270 Q200 860 200 790 Z" fill="#F4D19A" stroke="#FF8210" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M150 650 L870 640 L790 745 L150 715 Z" fill="#FFD93B" stroke="#FF8210" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="205" y="570" width="300" height="75" rx="37" fill="#EB3B2E" stroke="#FF8210" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="520" y="570" width="300" height="75" rx="37" fill="#EB3B2E" stroke="#FF8210" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M160 470 H866 L860 543 L850 548 L840 554 L830 561 L820 567 L810 572 L800 576 L790 579 L780 581 L770 581 L760 579 L750 576 L740 571 L730 565 L720 559 L710 553 L700 547 L690 542 L680 537 L670 534 L660 533 L650 533 L640 535 L630 539 L620 543 L610 549 L600 555 L590 561 L580 567 L570 573 L560 577 L550 580 L540 581 L530 581 L520 579 L510 575 L500 570 L490 565 L480 559 L470 552 L460 546 L450 541 L440 537 L430 534 L420 533 L410 534 L400 536 L390 539 L380 544 L370 550 L360 556 L350 562 L340 568 L330 573 L320 577 L310 580 L300 581 L290 580 L280 578 L270 575 L260 570 L250 564 L240 558 L230 552 L220 546 L210 541 L200 537 L190 534 L180 533 L170 534 L160 536 Z" fill="#7ED957" stroke="#FF8210" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M200 500 V410 C130 410 130 270 250 270 C285 195 430 185 512 185 C594 185 739 195 774 270 C894 270 894 410 824 410 V500 Z" fill="#FFFFFF" stroke="#FF8210" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="130" cy="210" r="22" fill="#FFFFFF"/>
+<circle cx="905" cy="190" r="30" fill="#FFFFFF"/>
+<circle cx="935" cy="285" r="14" fill="#FFFFFF"/>
+<path d="M100 600 C70 510 120 470 160 495 C170 545 150 590 100 600Z" fill="#7ED957"/>
+<path d="M930 560 C990 470 940 420 900 450 C885 500 890 545 930 560Z" fill="#7ED957"/>
+</svg>

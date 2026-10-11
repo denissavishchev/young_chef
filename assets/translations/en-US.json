@@ -53,5 +53,18 @@
   "remove": "Remove",
   "navHome": "Favorites",
   "navCreate": "Create recipe",
-  "navSettings": "Settings"
+  "navSettings": "Settings",
+  "navProduct": "Product",
+  "productTitle": "Product facts",
+  "productSubtitle": "Learn about a product",
+  "productLabel": "Product",
+  "productHint": "e.g. avocado",
+  "productAnalyze": "Tell me more",
+  "productAbout": "What is it",
+  "productProsCons": "Pros & cons",
+  "productPros": "Pros",
+  "productCons": "Cons",
+  "productUseful": "Why it is useful",
+  "productNutrition": "Per 100 g",
+  "fiber": "Fiber:"
 }

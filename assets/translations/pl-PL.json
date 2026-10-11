@@ -53,5 +53,18 @@
   "remove": "Usuń",
   "navHome": "Ulubione",
   "navCreate": "Stwórz przepis",
-  "navSettings": "Ustawienia"
+  "navSettings": "Ustawienia",
+  "navProduct": "Produkt",
+  "productTitle": "Wiedza o produkcie",
+  "productSubtitle": "Dowiedz się więcej o produkcie",
+  "productLabel": "Produkt",
+  "productHint": "np. awokado",
+  "productAnalyze": "Opowiedz więcej",
+  "productAbout": "Co to jest",
+  "productProsCons": "Wady i zalety",
+  "productPros": "Zalety",
+  "productCons": "Wady",
+  "productUseful": "Dlaczego jest przydatny",
+  "productNutrition": "Na 100 g",
+  "fiber": "Błonnik:"
 }

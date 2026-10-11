@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../widgets/notch_nav_bar.dart';
 import 'favorites_screen.dart';
 import 'main_screen.dart';
+import 'product_screen.dart';
 import 'settings_screen.dart';
 
-/// Hosts the three top-level tabs in a swipeable [PageView] with the notch
+/// Hosts the four top-level tabs in a swipeable [PageView] with the notch
 /// bottom bar following the page position.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -45,6 +46,7 @@ class _HomeShellState extends State<HomeShell> {
         children: const [
           _KeepAlive(child: FavoritesScreen()),
           _KeepAlive(child: MainScreen()),
+          _KeepAlive(child: ProductScreen()),
           _KeepAlive(child: SettingsScreen()),
         ],
       ),
@@ -59,6 +61,10 @@ class _HomeShellState extends State<HomeShell> {
           NotchNavItem(
             icon: Icons.restaurant_menu_outlined,
             activeIcon: Icons.restaurant_menu_rounded,
+          ),
+          NotchNavItem(
+            icon: Icons.eco_outlined,
+            activeIcon: Icons.eco_rounded,
           ),
           NotchNavItem(
             icon: Icons.settings_outlined,
