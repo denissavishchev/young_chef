@@ -78,16 +78,16 @@ class SettingsScreen extends StatelessWidget {
                         children: [
                           Expanded(
                             child: _Segment(
-                              label: 'girl'.tr(),
-                              selected: !data.isBoy,
-                              onTap: () => data.setBoyOrGirl(false),
+                              label: 'female'.tr(),
+                              selected: data.isFemale,
+                              onTap: data.toggleFemale,
                             ),
                           ),
                           Expanded(
                             child: _Segment(
-                              label: 'boy'.tr(),
-                              selected: data.isBoy,
-                              onTap: () => data.setBoyOrGirl(true),
+                              label: 'male'.tr(),
+                              selected: data.isMale,
+                              onTap: data.toggleMale,
                             ),
                           ),
                         ],

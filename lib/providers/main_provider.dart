@@ -43,7 +43,8 @@ class MainProvider with ChangeNotifier {
   bool onlyUserIngredients = true;
   RangeValues caloriesRange = const RangeValues(100, 1000);
   bool isRegularDiet = true;
-  bool isBoy = true;
+  bool isMale = false;
+  bool isFemale = false;
   double timeForCooking = 10;
   double cookingSkillLevel = 1;
   bool isVegan = false;
@@ -61,7 +62,7 @@ class MainProvider with ChangeNotifier {
     final prompt = [
       Content.multi([
         TextPart('''
-          Jesteś doświadczonym doradcą kulinarnym, który tworzy przepisy specjalnie dla nastolatków.
+          Jesteś doświadczonym doradcą kulinarnym, który tworzy przepisy dla każdego.
 
             Na podstawie podanych produktów: ${questionController.text}
           
@@ -73,9 +74,9 @@ class MainProvider with ChangeNotifier {
           
             - Kaloryczność: Całe danie powinno mieścić się w zakresie od ${caloriesRange.start} do ${caloriesRange.end} kcal.
           
-            - Typ diety: ${isRegularDiet ? "Standardowa, zbalansowana dieta nastolatka." : "Dieta dopasowana do potrzeb młodego sportowca / dnia treningowego — uwzględnij odpowiednią podaż białka i węglowodanów wspierających regenerację i energię."}
+            - Typ diety: ${isRegularDiet ? "Standardowa, zbalansowana dieta." : "Dieta dopasowana do potrzeb sportowca / dnia treningowego — uwzględnij odpowiednią podaż białka i węglowodanów wspierających regenerację i energię."}
           
-            - Płeć osoby, dla której przygotowywany jest przepis: ${isBoy ? "chłopak" : "dziewczynka"} (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie).
+            - Płeć osoby, dla której przygotowywany jest przepis: ${isMale == isFemale ? "nieokreślona / dowolna — nie uwzględniaj płci, przepis ma być odpowiedni zarówno dla kobiet, jak i mężczyzn." : isMale ? "mężczyzna (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)." : "kobieta (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)."}
           
             - Czas przygotowania: Przepis musi być możliwy do wykonania w maksymalnie $timeForCooking minut.
           
@@ -89,8 +90,8 @@ class MainProvider with ChangeNotifier {
             - Alergie: ${allergiesController.text.isEmpty ? "Brak alergii do uwzględnienia." : "Osoba jest uczulona na: ${allergiesController.text}. Pod żadnym pozorem nie używaj tych składników ani produktów je zawierających, nawet jeśli zostały podane jako dostępne produkty."}
           
             Wygeneruj jeden przepis kulinarny, który spełnia następujące wymagania:
-            - Jest odpowiedni dla nastolatka (prosty, zrozumiały, bez skomplikowanych technik kulinarnych, dopasowany do podanego poziomu umiejętności)
-            - Jest łatwy do przygotowania w podanym limicie czasu, przy użyciu podstawowych narzędzi kuchennych
+            - Jest zrozumiały, a jego trudność i złożoność technik kulinarnych są dopasowane do podanego poziomu umiejętności
+            - Da się go przygotować w podanym limicie czasu, przy użyciu podstawowych narzędzi kuchennych
             - Jest zdrowy (zbalansowany, bez nadmiaru cukru, soli i tłuszczu)
             - Spełnia wszystkie powyższe parametry (źródło składników, kaloryczność, typ diety, dieta wegańska, niechciane składniki, alergie)
             - Pole "instructions" MUSI być tablicą stringów: każdy element to JEDEN osobny krok przygotowania.
@@ -110,7 +111,7 @@ class MainProvider with ChangeNotifier {
                 "onlyUserIngredients": true,
                 "caloriesRange": "od-do",
                 "dietType": "standardowa / sportowa",
-                "gender": "chłopak/dziewczynka",
+                "gender": "mężczyzna / kobieta / dowolna",
                 "cookingTime": "czas w minutach",
                 "cookingSkillLevel": "1-5",
                 "isVegan": false,
@@ -236,10 +237,17 @@ class MainProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setBoyOrGirl(bool? value) async {
+  void toggleMale() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    isBoy = value ?? false;
-    await prefs.setBool('isBoy', isBoy);
+    isMale = !isMale;
+    await prefs.setBool('isMale', isMale);
+    notifyListeners();
+  }
+
+  void toggleFemale() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    isFemale = !isFemale;
+    await prefs.setBool('isFemale', isFemale);
     notifyListeners();
   }
 
@@ -279,7 +287,8 @@ class MainProvider with ChangeNotifier {
   void getValuesFromMemory() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     onlyUserIngredients = prefs.getBool('onlyUserIngredients') ?? true;
-    isBoy = prefs.getBool('isBoy') ?? true;
+    isMale = prefs.getBool('isMale') ?? false;
+    isFemale = prefs.getBool('isFemale') ?? false;
     cookingSkillLevel = prefs.getDouble('cookingSkillLevel') ?? 1;
     allergiesController.text = prefs.getString('allergies') ?? '';
     notLikeController.text = prefs.getString('notLikes') ?? '';
