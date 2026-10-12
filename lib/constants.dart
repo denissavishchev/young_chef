@@ -13,10 +13,19 @@ final kBigTextStyle = TextStyle(
   fontSize: 15.sp,
 );
 
+/// Screen title shared by every top-level screen.
+final kHeaderStyle = kBigTextStyle.copyWith(
+  fontSize: 24.sp,
+  shadows: kIconShadow,
+);
+
 // Outline UI palette (recipe screen + bottom bar).
 const kBg = Color(0xFFDCE4EC);
 const kLine = Color(0xFF16171B);
 const kGlow = Color(0xFFB4C2E0);
+const kShadow = Color(
+  0xFF9EA2AB,
+); // neutral gray under tiles, icons and the bar
 const kLineWidth = 2.5;
 
 /// Tile with a thick dark outline and a soft glow, the base of this UI
@@ -32,7 +41,7 @@ BoxDecoration outlineDecoration({
   border: Border.all(color: kLine, width: kLineWidth),
   boxShadow: [
     BoxShadow(
-      color: kGlow.withValues(alpha: 0.8),
+      color: kShadow.withValues(alpha: 0.8),
       blurRadius: 12,
       offset: const Offset(0, 4),
     ),
@@ -73,4 +82,6 @@ SliderThemeData outlineSliderTheme() => SliderThemeData(
 );
 
 /// Soft glow under icons, same as the bottom bar's.
-const kIconShadow = [Shadow(color: kGlow, blurRadius: 6, offset: Offset(2, 4))];
+const kIconShadow = [
+  Shadow(color: kShadow, blurRadius: 6, offset: Offset(2, 4)),
+];

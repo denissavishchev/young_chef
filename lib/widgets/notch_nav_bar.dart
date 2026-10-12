@@ -222,7 +222,7 @@ class _BarPainter extends CustomPainter {
     canvas.drawPath(
       shape.shift(const Offset(0, 4)),
       Paint()
-        ..color = kGlow.withValues(alpha: 0.8)
+        ..color = kShadow.withValues(alpha: 0.8)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
     );
     canvas.restore();

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/main_provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../constants.dart';
 import 'recipe_screen.dart';
 
@@ -23,42 +24,51 @@ class FavoritesScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Row(
-                spacing: 12,
+                spacing: 10,
                 children: [
-                  Text(
-                    'favorites'.tr(),
-                    style: kBigTextStyle.copyWith(color: kLine),
+                  const Icon(
+                    shadows: kIconShadow,
+                    Icons.home_rounded,
+                    size: 28,
+                    color: kLine,
                   ),
+                  Text('myRecipes'.tr(), style: kHeaderStyle),
                 ],
               ),
             ),
             Expanded(
-              child: favorites.isEmpty
-                  ? Center(
-                      child: Text(
-                        'noFavorites'.tr(),
-                        style: kTextStyle.copyWith(
-                          color: kLine.withValues(alpha: 0.55),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+                child: favorites.isEmpty
+                    ? Center(
+                        child: Text(
+                          'noFavorites'.tr(),
+                          style: kTextStyle.copyWith(
+                            color: kLine.withValues(alpha: 0.55),
+                          ),
                         ),
+                      )
+                    : GridView.builder(
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          8,
+                          16,
+                          16 + MediaQuery.paddingOf(context).bottom,
+                        ),
+                        itemCount: favorites.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          mainAxisExtent:
+                              MediaQuery.sizeOf(context).height * 0.4,
+                        ),
+                        itemBuilder: (context, i) =>
+                            _FavoriteTile(favorite: favorites[i]),
                       ),
-                    )
-                  : GridView.builder(
-                      padding: EdgeInsets.fromLTRB(
-                        16,
-                        8,
-                        16,
-                        16 + MediaQuery.paddingOf(context).bottom,
-                      ),
-                      itemCount: favorites.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        mainAxisExtent: MediaQuery.sizeOf(context).height * 0.4,
-                      ),
-                      itemBuilder: (context, i) =>
-                          _FavoriteTile(favorite: favorites[i]),
-                    ),
+              ),
             ),
           ],
         ),
@@ -95,17 +105,24 @@ class _FavoriteTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: favorite.photoPath != null
-                    ? Image.file(
-                        File(favorite.photoPath!),
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const _PhotoPlaceholder(),
-                      )
-                    : const _PhotoPlaceholder(),
+                child: Padding(
+                  padding: const EdgeInsets.all(1),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24 - kLineWidth - 1),
+                    child: favorite.photoPath != null
+                        ? Image.file(
+                            File(favorite.photoPath!),
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) =>
+                                const _PhotoPlaceholder(),
+                          )
+                        : const _PhotoPlaceholder(),
+                  ),
+                ),
               ),
               Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(10, 4, 10, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 8,
@@ -114,11 +131,10 @@ class _FavoriteTile extends StatelessWidget {
                       recipe.recipeName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: kBigTextStyle.copyWith(color: kLine),
+                      style: kTextStyle.copyWith(color: kLine),
                     ),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                    Row(
+                      spacing: 6,
                       children: [
                         if (recipe.calories.isNotEmpty)
                           _Pill(label: recipe.calories, color: kLine),
@@ -169,12 +185,15 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(40),
       ),
-      child: Text(label, style: kTextStyle.copyWith(color: Colors.white)),
+      child: Text(
+        label,
+        style: kTextStyle.copyWith(color: Colors.white, fontSize: 10.sp),
+      ),
     );
   }
 }

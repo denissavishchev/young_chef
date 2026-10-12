@@ -5,6 +5,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import '../../providers/main_provider.dart';
 import '../constants.dart';
+import '../widgets/cooking_loader.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -50,20 +51,14 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             const Icon(
                               shadows: kIconShadow,
-                              Icons.restaurant_rounded,
+                              Icons.restaurant_menu_rounded,
                               size: 28,
                               color: kLine,
                             ),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Young Chef',
-                                    style: kBigTextStyle.copyWith(color: kLine),
-                                  ),
-                                  Text('ingredients'.tr(), style: muted),
-                                ],
+                              child: Text(
+                                'createRecipe'.tr(),
+                                style: kHeaderStyle,
                               ),
                             ),
                           ],
@@ -415,9 +410,7 @@ class _MainScreenState extends State<MainScreen> {
                   Positioned.fill(
                     child: ColoredBox(
                       color: kBg.withValues(alpha: 0.94),
-                      child: Center(
-                        child: const CircularProgressIndicator(color: kLine),
-                      ),
+                      child: Center(child: const CookingLoader()),
                     ),
                   ),
               ],

@@ -62,10 +62,7 @@ class _HomeShellState extends State<HomeShell> {
             icon: Icons.restaurant_menu_outlined,
             activeIcon: Icons.restaurant_menu_rounded,
           ),
-          NotchNavItem(
-            icon: Icons.eco_outlined,
-            activeIcon: Icons.eco_rounded,
-          ),
+          NotchNavItem(icon: Icons.eco_outlined, activeIcon: Icons.eco_rounded),
           NotchNavItem(
             icon: Icons.settings_outlined,
             activeIcon: Icons.settings_rounded,

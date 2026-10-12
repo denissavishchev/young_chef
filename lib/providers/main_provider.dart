@@ -102,9 +102,9 @@ class MainProvider with ChangeNotifier {
               "ingredients": ["składnik 1 z ilością", "składnik 2 z ilością"],
               "instructions": ["krok 1", "krok 2"],
               "calories": "Wartość kaloryczna całego dania w kcal (tylko liczba + jednostka)",
-              "protein": "orientacyjna ilość białka (tylko liczba + jednostka)",
-              "carbohydrates": "orientacyjna ilość węglowodanów (tylko liczba + jednostka)",
-              "fat": "orientacyjna ilość tłuszczu (tylko liczba + jednostka)",
+              "protein": "ilość białka w gramach (tylko liczba + jednostka, bez słów typu 'około' i bez znaku ~)",
+              "carbohydrates": "ilość węglowodanów w gramach (tylko liczba + jednostka, bez słów typu 'około' i bez znaku ~)",
+              "fat": "ilość tłuszczu w gramach (tylko liczba + jednostka, bez słów typu 'około' i bez znaku ~)",
               "developerInfo": {
                 "products": "podane produkty",
                 "onlyUserIngredients": true,
@@ -141,10 +141,6 @@ class MainProvider with ChangeNotifier {
           fallbackVegan: isVegan,
         );
         favoriteId = null;
-        log(answer.recipeName);
-        log(answer.ingredients.toString());
-        log(answer.instructions.toString());
-        log(answer.developerInfo);
         if (!context.mounted) return;
         Navigator.push(
           context,

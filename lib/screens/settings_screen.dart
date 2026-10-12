@@ -38,15 +38,16 @@ class SettingsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Row(
+                      spacing: 10,
                       children: [
+                        const Icon(
+                          shadows: kIconShadow,
+                          Icons.settings_rounded,
+                          size: 28,
+                          color: kLine,
+                        ),
                         Expanded(
-                          child: Text(
-                            'navSettings'.tr(),
-                            style: kBigTextStyle.copyWith(
-                              color: kLine,
-                              fontSize: 28,
-                            ),
-                          ),
+                          child: Text('navSettings'.tr(), style: kHeaderStyle),
                         ),
                         Container(
                           padding: const EdgeInsets.all(10),

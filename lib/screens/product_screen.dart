@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import '../widgets/notch_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -25,11 +26,6 @@ class _ProductScreenState extends State<ProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final muted = kTextStyle.copyWith(
-      color: kLine.withValues(alpha: 0.55),
-      fontWeight: FontWeight.w600,
-    );
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -54,43 +50,42 @@ class _ProductScreenState extends State<ProductScreen> {
                           color: kLine,
                         ),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'productTitle'.tr(),
-                                style: kBigTextStyle.copyWith(color: kLine),
-                              ),
-                              Text('productSubtitle'.tr(), style: muted),
-                            ],
-                          ),
+                          child: Text('productTitle'.tr(), style: kHeaderStyle),
                         ),
                       ],
                     ),
                   ),
                   Expanded(
-                    child: SingleChildScrollView(
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      padding: EdgeInsets.fromLTRB(
-                        16,
-                        12,
-                        16,
-                        12 + 64 + 12 + MediaQuery.paddingOf(context).bottom,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(24),
                       ),
-                      child: Column(
-                        spacing: 14,
-                        children: [
-                          _InputCard(data: data),
-                          _AnalyzeButton(data: data),
-                          if (data.hasError)
-                            _Tile(
-                              icon: Icons.error_outline_rounded,
-                              title: 'tryAgainSoon'.tr(),
-                              child: const SizedBox.shrink(),
-                            ),
-                          if (info != null && !data.isLoading) ..._tiles(info),
-                        ],
+                      child: SingleChildScrollView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          12,
+                          16,
+                          NotchNavBar.barHeight -
+                              8 +
+                              MediaQuery.paddingOf(context).bottom,
+                        ),
+                        child: Column(
+                          spacing: 14,
+                          children: [
+                            _InputCard(data: data),
+                            _AnalyzeButton(data: data),
+                            if (data.hasError)
+                              _Tile(
+                                icon: Icons.error_outline_rounded,
+                                title: 'tryAgainSoon'.tr(),
+                                child: const SizedBox.shrink(),
+                              ),
+                            if (info != null && !data.isLoading)
+                              ..._tiles(info),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -369,7 +364,11 @@ class _Tile extends StatelessWidget {
 }
 
 class _Bullets extends StatelessWidget {
-  const _Bullets({required this.label, required this.icon, required this.items});
+  const _Bullets({
+    required this.label,
+    required this.icon,
+    required this.items,
+  });
 
   final String label;
   final IconData icon;

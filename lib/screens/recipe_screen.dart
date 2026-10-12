@@ -10,7 +10,6 @@ import '../constants.dart';
 
 final _text = kTextStyle.copyWith(color: kLine);
 final _heading = kBigTextStyle.copyWith(color: kLine, fontSize: 18);
-final _title = kBigTextStyle.copyWith(color: kLine);
 
 BoxDecoration _outline({double radius = 28, Color color = kBg}) =>
     outlineDecoration(radius: radius, color: color);
@@ -46,19 +45,40 @@ class _RecipeScreenState extends State<RecipeScreen> {
     if (id != null) {
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text('removeFavoriteTitle'.tr()),
-          content: Text('removeFavoriteBody'.tr()),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text('cancel'.tr()),
+        builder: (ctx) => Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: _outline(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 12,
+              children: [
+                Text(
+                  'removeFavoriteTitle'.tr(),
+                  textAlign: TextAlign.center,
+                  style: kHeaderStyle,
+                ),
+                Text(
+                  'removeFavoriteBody'.tr(),
+                  textAlign: TextAlign.center,
+                  style: _text.copyWith(color: kLine.withValues(alpha: 0.55)),
+                ),
+                _ActionTile(
+                  icon: Icons.heart_broken_rounded,
+                  label: 'remove'.tr(),
+                  onPressed: () => Navigator.pop(ctx, true),
+                ),
+                _ActionTile(
+                  icon: Icons.close_rounded,
+                  label: 'cancel'.tr(),
+                  onPressed: () => Navigator.pop(ctx, false),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text('remove'.tr(), style: _text),
-            ),
-          ],
+          ),
         ),
       );
       if (confirmed != true) return;
@@ -69,49 +89,40 @@ class _RecipeScreenState extends State<RecipeScreen> {
     final choice = await showModalBottomSheet<_PhotoChoice>(
       context: context,
       backgroundColor: kBg,
-      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        side: BorderSide(color: kLine, width: kLineWidth),
+      ),
       builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('addPhotoTitle'.tr(), style: kBigTextStyle),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 12,
+            children: [
+              Text('addPhotoTitle'.tr(), style: kHeaderStyle),
+              Text(
                 'addPhotoSubtitle'.tr(),
                 textAlign: TextAlign.center,
                 style: _text.copyWith(color: kLine.withValues(alpha: 0.55)),
               ),
-            ),
-            ListTile(
-              leading: const Icon(
-                shadows: kIconShadow,
-                Icons.photo_camera_rounded,
-                color: kLine,
+              _ActionTile(
+                icon: Icons.photo_camera_rounded,
+                label: 'takePhoto'.tr(),
+                onPressed: () => Navigator.pop(ctx, _PhotoChoice.camera),
               ),
-              title: Text('takePhoto'.tr(), style: _text),
-              onTap: () => Navigator.pop(ctx, _PhotoChoice.camera),
-            ),
-            ListTile(
-              leading: const Icon(
-                shadows: kIconShadow,
-                Icons.photo_library_rounded,
-                color: kLine,
+              _ActionTile(
+                icon: Icons.photo_library_rounded,
+                label: 'chooseFromGallery'.tr(),
+                onPressed: () => Navigator.pop(ctx, _PhotoChoice.gallery),
               ),
-              title: Text('chooseFromGallery'.tr(), style: _text),
-              onTap: () => Navigator.pop(ctx, _PhotoChoice.gallery),
-            ),
-            ListTile(
-              leading: const Icon(
-                shadows: kIconShadow,
-                Icons.favorite_border_rounded,
-                color: kLine,
+              _ActionTile(
+                icon: Icons.favorite_border_rounded,
+                label: 'saveWithoutPhoto'.tr(),
+                onPressed: () => Navigator.pop(ctx, _PhotoChoice.none),
               ),
-              title: Text('saveWithoutPhoto'.tr(), style: _text),
-              onTap: () => Navigator.pop(ctx, _PhotoChoice.none),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -177,9 +188,22 @@ class _RecipeScreenState extends State<RecipeScreen> {
                 spacing: 16,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    recipe.recipeName,
-                    style: _title.copyWith(fontSize: 28, height: 1.15),
+                  Row(
+                    spacing: 10,
+                    children: [
+                      const Icon(
+                        shadows: kIconShadow,
+                        Icons.restaurant_menu_rounded,
+                        size: 28,
+                        color: kLine,
+                      ),
+                      Expanded(
+                        child: Text(
+                          recipe.recipeName,
+                          style: kHeaderStyle.copyWith(height: 1.15),
+                        ),
+                      ),
+                    ],
                   ),
                   _RecipeCard(
                     title: 'ingredients'.tr(),
@@ -231,12 +255,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     child: Row(
                       spacing: 12,
                       children: [
-                        const Icon(
-                          Icons.alarm_rounded,
-                          size: 26,
-                          color: kLine,
-                          shadows: kIconShadow,
-                        ),
                         Expanded(
                           child: Text(
                             switch (status) {
@@ -260,25 +278,15 @@ class _RecipeScreenState extends State<RecipeScreen> {
                               shadows: kIconShadow,
                             ),
                           ),
-                        GestureDetector(
-                          onTap: () => _timerAction(timer, recipe.recipeName),
-                          child: Container(
-                            width: 56,
-                            height: 56,
-                            decoration: const BoxDecoration(
-                              color: kLine,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              switch (status) {
-                                TimerStatus.running => Icons.pause_rounded,
-                                TimerStatus.finished => Icons.stop_rounded,
-                                _ => Icons.play_arrow_rounded,
-                              },
-                              color: kBg,
-                              size: 30,
-                            ),
-                          ),
+                        _IconSquare(
+                          icon: switch (status) {
+                            TimerStatus.idle => Icons.hourglass_bottom_rounded,
+                            TimerStatus.running => Icons.pause_rounded,
+                            TimerStatus.paused => Icons.play_arrow_rounded,
+                            TimerStatus.finished => Icons.stop_rounded,
+                          },
+                          onPressed: () =>
+                              _timerAction(timer, recipe.recipeName),
                         ),
                       ],
                     ),
@@ -325,6 +333,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
   }
 }
 
+/// Strips "około", "ok.", "~" etc. from model output, also for saved recipes.
+final _approx = RegExp(
+  r'(około|ok\.|circa|approx\.?|about|~|≈|примерно|около)\s*',
+  caseSensitive: false,
+);
+
 class _Macro extends StatelessWidget {
   const _Macro(this.label, this.value);
 
@@ -337,7 +351,7 @@ class _Macro extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            value,
+            value.replaceAll(_approx, '').trim(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: _heading.copyWith(fontSize: 15),
@@ -370,6 +384,40 @@ class _IconSquare extends StatelessWidget {
         height: 60,
         decoration: _outline(radius: 20),
         child: Icon(shadows: kIconShadow, icon, color: kLine, size: 28),
+      ),
+    );
+  }
+}
+
+/// Full-width outlined button: icon + label, same look as the other buttons.
+class _ActionTile extends StatelessWidget {
+  const _ActionTile({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: _outline(radius: 20),
+        child: Row(
+          spacing: 14,
+          children: [
+            Icon(icon, color: kLine, size: 28, shadows: kIconShadow),
+            Expanded(
+              child: Text(label, style: _heading.copyWith(fontSize: 15)),
+            ),
+          ],
+        ),
       ),
     );
   }

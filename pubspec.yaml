@@ -46,14 +46,14 @@ flutter_launcher_icons:
   image_path: assets/icon/icon.png
   image_path_android: assets/icon/icon_rounded.png
   remove_alpha_ios: true
-  adaptive_icon_background: "#FF8210"
+  adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: assets/icon/icon.png
 
 flutter_native_splash:
-  color: "#FF8210"
+  color: "#FFFFFF"
   image: assets/icon/icon_foreground.png
   android_12:
-    color: "#FF8210"
+    color: "#FFFFFF"
     image: assets/icon/icon_foreground.png
   fullscreen: false
 
