@@ -41,18 +41,48 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> initSpeech() async {
     final available = await speech.initialize(
-      onStatus: (status) => log('Status: $status'),
+      onStatus: (status) {
+        log('Status: $status');
+        if (status == 'done' || status == 'notListening') {
+          if (_wantListening) {
+            _listen();
+          } else {
+            isListening = false;
+            notifyListeners();
+          }
+        }
+      },
       onError: (error) => log('Błąd: $error'),
     );
     if (!available) log('Speech recognition niedostępny na tym urządzeniu');
     notifyListeners();
   }
 
-  void startListening(BuildContext context) async {
-    _baseText = controller.text;
-    if (_baseText.isNotEmpty && !_baseText.endsWith(' ')) _baseText += ' ';
+  bool _wantListening = false;
+  int _sessionStart = 0;
+
+  /// Words dictated since the pop-up was opened (the field keeps older text).
+  String get voiceText {
+    final t = controller.text;
+    return t.length > _sessionStart ? t.substring(_sessionStart).trim() : '';
+  }
+
+  String _localeId = '';
+
+  void startListening(BuildContext context) {
+    _localeId = context.locale.toString();
+    _wantListening = true;
+    _sessionStart = controller.text.length;
     isListening = true;
     notifyListeners();
+    _listen();
+  }
+
+  /// The plugin stops after a few seconds of silence, so it is restarted for as
+  /// long as the user has not finished recording; text already dictated stays.
+  Future<void> _listen() async {
+    _baseText = controller.text;
+    if (_baseText.isNotEmpty && !_baseText.endsWith(' ')) _baseText += ' ';
     await speech.listen(
       onResult: (result) {
         controller.text = _baseText + result.recognizedWords;
@@ -62,14 +92,17 @@ class ProductProvider with ChangeNotifier {
         notifyListeners();
       },
       listenOptions: SpeechListenOptions(
-        localeId: context.locale.toString(),
+        localeId: _localeId,
+        listenFor: const Duration(minutes: 5),
+        pauseFor: const Duration(seconds: 30),
         partialResults: true,
-        cancelOnError: true,
+        cancelOnError: false,
       ),
     );
   }
 
   void stopListening() async {
+    _wantListening = false;
     await speech.stop();
     isListening = false;
     notifyListeners();

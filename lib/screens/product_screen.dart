@@ -2,11 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import '../widgets/notch_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../models/product_model.dart';
 import '../providers/product_provider.dart';
+import '../widgets/voice_dialog.dart';
 
 /// Type, say or photograph a product and get its story, pros and cons and
 /// nutrition per 100 g.
@@ -193,19 +193,6 @@ class _InputCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (data.isListening)
-                      Positioned.fill(
-                        child: ColoredBox(
-                          color: kBg.withValues(alpha: 0.8),
-                          child: Center(
-                            child: SpinKitWave(
-                              color: kLine,
-                              size: 28,
-                              itemCount: 7,
-                            ),
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
@@ -244,9 +231,14 @@ class _InputCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               GestureDetector(
-                onTapDown: (_) => data.startListening(context),
-                onTapUp: (_) => data.stopListening(),
-                onTapCancel: () => data.stopListening(),
+                onTap: () => showVoiceDialog(
+                  context,
+                  text: () => data.voiceText,
+                  listening: data,
+                  isListening: () => data.isListening,
+                  onStart: () => data.startListening(context),
+                  onStop: data.stopListening,
+                ),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
                   width: 56,
