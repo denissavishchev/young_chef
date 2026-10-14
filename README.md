@@ -1,4 +1,4 @@
-# young_chef
+# Everyday Chef
 
 A new Flutter project.
 

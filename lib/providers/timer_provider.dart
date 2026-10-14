@@ -109,7 +109,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
           loopAudio: true,
           vibrate: true,
           warningNotificationOnKill: Platform.isIOS,
-          androidFullScreenIntent: true,
+          androidFullScreenIntent: false,
           volumeSettings: const VolumeSettings.fixed(volumeEnforced: true),
           notificationSettings: NotificationSettings(
             title: 'timerDoneTitle'.tr(),

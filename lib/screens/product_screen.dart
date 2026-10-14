@@ -414,7 +414,10 @@ class _NutrientRow extends StatelessWidget {
             color: kLine,
             borderRadius: BorderRadius.circular(40),
           ),
-          child: Text(value, style: kTextStyle.copyWith(color: Colors.white)),
+          child: Text(
+            localizeUnits(value),
+            style: kTextStyle.copyWith(color: Colors.white),
+          ),
         ),
       ],
     );

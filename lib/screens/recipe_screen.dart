@@ -351,7 +351,7 @@ class _Macro extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            value.replaceAll(_approx, '').trim(),
+            localizeUnits(value.replaceAll(_approx, '').trim()),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: _heading.copyWith(fontSize: 15),

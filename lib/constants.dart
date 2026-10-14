@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -85,3 +86,12 @@ SliderThemeData outlineSliderTheme() => SliderThemeData(
 const kIconShadow = [
   Shadow(color: kShadow, blurRadius: 6, offset: Offset(2, 4)),
 ];
+
+final _kcalUnit = RegExp(r'\b(kcal|ккал)\b', caseSensitive: false);
+final _gramUnit = RegExp(r'(?<=\d)\s*(g|gr|г)\b', caseSensitive: false);
+
+/// Model output carries units in whatever language it picked; show them in the
+/// app language.
+String localizeUnits(String value) => value
+    .replaceAll(_kcalUnit, 'kcalUnit'.tr())
+    .replaceAllMapped(_gramUnit, (_) => ' ${'gramUnit'.tr()}');

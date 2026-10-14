@@ -1,9 +1,9 @@
 name: young_chef
-description: "Young Chef"
+description: "Everyday Chef"
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.0.1+1
 
 environment:
   sdk: ^3.10.9
@@ -51,10 +51,10 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#FFFFFF"
-  image: assets/icon/icon_foreground.png
+  image: assets/icon/splash.png
   android_12:
     color: "#FFFFFF"
-    image: assets/icon/icon_foreground.png
+    image: assets/icon/splash.png
   fullscreen: false
 
 flutter:

@@ -1,4 +1,4 @@
-package com.devis.young_chef
+package com.devislaboratory.youngchef
 
 import io.flutter.embedding.android.FlutterActivity
 
