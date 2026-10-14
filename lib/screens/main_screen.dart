@@ -250,6 +250,35 @@ class _MainScreenState extends State<MainScreen> {
                                       ],
                                     ),
                                   ),
+                                  GestureDetector(
+                                    onTap: () => data.getRecipe(context),
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 64,
+                                      decoration: outlineDecoration(
+                                        radius: 32,
+                                        color: kLine,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        spacing: 10,
+                                        children: [
+                                          Text(
+                                            'createRecipe'.tr(),
+                                            style: kTextStyle.copyWith(
+                                              color: kBg,
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.cookie_rounded,
+                                            size: 24,
+                                            color: kBg,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                   Container(
                                     width: double.infinity,
                                     padding: const EdgeInsets.fromLTRB(
@@ -318,23 +347,63 @@ class _MainScreenState extends State<MainScreen> {
                                             ),
                                           ),
                                         ),
-                                        Row(
-                                          spacing: 10,
-                                          children: [
-                                            _Chip(
-                                              label: 'sportDiet'.tr(),
-                                              selected: !data.isRegularDiet,
-                                              onTap: () => data
-                                                  .setRegularOrSportDiet(false),
-                                            ),
-                                            _Chip(
-                                              label: 'regularDiet'.tr(),
-                                              selected: data.isRegularDiet,
-                                              onTap: () => data
-                                                  .setRegularOrSportDiet(true),
-                                            ),
-                                          ],
+                                        Text(
+                                          'dietTypeLabel'.tr(),
+                                          style: muted,
                                         ),
+                                        if (!data.isKids)
+                                          Row(
+                                            spacing: 10,
+                                            children: [
+                                              _Chip(
+                                                label: 'sportDiet'.tr(),
+                                                selected: !data.isRegularDiet,
+                                                onTap: () =>
+                                                    data.setRegularOrSportDiet(
+                                                      false,
+                                                    ),
+                                              ),
+                                              _Chip(
+                                                label: 'regularDiet'.tr(),
+                                                selected: data.isRegularDiet,
+                                                onTap: () =>
+                                                    data.setRegularOrSportDiet(
+                                                      true,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: _Chip(
+                                            label: 'kidsDiet'.tr(),
+                                            selected: data.isKids,
+                                            onTap: () =>
+                                                data.setIsKids(!data.isKids),
+                                          ),
+                                        ),
+                                        if (data.isKids)
+                                          _OptionBlock(
+                                            title: 'kidsAgeLabel'.tr(),
+                                            value:
+                                                '${data.kidsAge.toInt()} ${'yearsUnit'.tr()}',
+                                            titleStyle: muted,
+                                            child: SliderTheme(
+                                              data: _sliderTheme(),
+                                              child: Slider(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 4,
+                                                    ),
+                                                value: data.kidsAge,
+                                                min: 0,
+                                                max: 5,
+                                                divisions: 5,
+                                                onChanged: (v) =>
+                                                    data.setKidsAge(v),
+                                              ),
+                                            ),
+                                          ),
                                         _Chip(
                                           label: 'isVegan'.tr(),
                                           selected: data.isVegan,
@@ -345,48 +414,6 @@ class _MainScreenState extends State<MainScreen> {
                                     ),
                                   ),
                                 ],
-                              ),
-                            ),
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              bottom: MediaQuery.paddingOf(context).bottom,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  0,
-                                  16,
-                                  12,
-                                ),
-                                child: GestureDetector(
-                                  onTap: () => data.getRecipe(context),
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 64,
-                                    decoration: outlineDecoration(
-                                      radius: 32,
-                                      color: kLine,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      spacing: 10,
-                                      children: [
-                                        Text(
-                                          'createRecipe'.tr(),
-                                          style: kTextStyle.copyWith(
-                                            color: kBg,
-                                          ),
-                                        ),
-                                        const Icon(
-                                          Icons.cookie_rounded,
-                                          size: 24,
-                                          color: kBg,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
                               ),
                             ),
                           ],

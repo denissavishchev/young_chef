@@ -76,6 +76,11 @@ void main() async {
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
               locale: context.locale,
+              builder: (context, child) => GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: child,
+              ),
               home: const HomeShell(),
             ),
           );

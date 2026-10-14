@@ -43,6 +43,8 @@ class MainProvider with ChangeNotifier {
   bool onlyUserIngredients = true;
   RangeValues caloriesRange = const RangeValues(100, 1000);
   bool isRegularDiet = true;
+  bool isKids = false;
+  double kidsAge = 3;
   bool isMale = false;
   bool isFemale = false;
   double timeForCooking = 10;
@@ -76,7 +78,19 @@ class MainProvider with ChangeNotifier {
           
             - Typ diety: ${isRegularDiet ? "Standardowa, zbalansowana dieta." : "Dieta dopasowana do potrzeb sportowca / dnia treningowego — uwzględnij odpowiednią podaż białka i węglowodanów wspierających regenerację i energię."}
           
-            - Płeć osoby, dla której przygotowywany jest przepis: ${isMale == isFemale ? "nieokreślona / dowolna — nie uwzględniaj płci, przepis ma być odpowiedni zarówno dla kobiet, jak i mężczyzn." : isMale ? "mężczyzna (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)." : "kobieta (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)."}
+            - Przepis dla dziecka: ${isKids ? """TAK — przepis jest przygotowywany dla dziecka w wieku ${kidsAge.toInt()} lat (skala 0–5 lat; 0 = niemowlę poniżej 1. roku życia). Ten punkt ma PIERWSZEŃSTWO nad typem diety, płcią, poziomem kalorii i dietą sportową — jeśli się z nimi kłócą, wygrywają zasady dla dziecka. Zasady:
+              * Dopasuj konsystencję i formę dania do wieku: 0 lat — wyłącznie gładkie purée lub bardzo miękkie, rozgniecione papki, bez kawałków; 1 rok — miękkie, drobno posiekane lub rozgniecione kawałki; 2–3 lata — małe, miękkie kawałki łatwe do gryzienia; 4–5 lat — normalne, ale pokrojone na małe kawałki, bez twardych elementów.
+              * Bezpieczeństwo: ZERO ryzyka zadławienia (żadnych całych orzechów, całych winogron, twardych surowych warzyw, popcornu, pestek, ości); bez soli, bez cukru, bez miodu (dla dzieci poniżej 1. roku życia miód jest zakazany), bez ostrych przypraw, bez surowych jaj, surowego mięsa i ryb, bez alkoholu i kofeiny.
+              * Odżywianie: łagodny smak, wartościowe składniki (żelazo, wapń, zdrowe tłuszcze, błonnik), porcja dopasowana do wieku dziecka (dużo mniejsza niż dla dorosłego). Pole kalorii i makroskładników podaj dla tej dziecięcej porcji, ignorując podany wyżej zakres kalorii.
+        * Metody obróbki: ZAKAZ smażenia (także na głębokim tłuszczu i na patelni) oraz pieczenia (piekarnik, grill, opiekanie, zapiekanie). Dozwolone wyłącznie gotowanie, gotowanie na parze, duszenie w wodzie/bulionie lub podanie na surowo (tylko produkty bezpieczne w takiej formie, np. dojrzały owoc w formie purée).
+                    * Adresat instrukcji: przepis przygotowuje RODZIC lub opiekun, nie dziecko. Pisz kroki bezpośrednio do rodzica (np. "Ugotuj...", "Rozgnieć...") i NIE dodawaj uwag w stylu "to robi dorosły" ani "dziecko może pomóc". Na końcu dodaj krok, by potrawę ostudzić i sprawdzić jej temperaturę przed podaniem dziecku.
+              * Nazwa przepisu (pole "recipeName") MUSI być bajkowa i zabawna, z nawiązaniem do postaci z bajek, np. "Zupka Kubusia Puchatka", "Marchewkowe puree Krecika", "Magiczna owsianka Elsy", "Papka Świnki Peppy". Wybierz bohatera bajkowego pasującego do głównego składnika i dostosowanego do wieku dziecka, nazwa ma być krótka i radosna.""" : "NIE — przepis nie jest przeznaczony dla dziecka."}
+
+            - Płeć osoby, dla której przygotowywany jest przepis: ${isMale == isFemale
+            ? "nieokreślona / dowolna — nie uwzględniaj płci, przepis ma być odpowiedni zarówno dla kobiet, jak i mężczyzn."
+            : isMale
+            ? "mężczyzna (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)."
+            : "kobieta (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)."}
           
             - Czas przygotowania: Przepis musi być możliwy do wykonania w maksymalnie $timeForCooking minut.
           
@@ -110,7 +124,8 @@ class MainProvider with ChangeNotifier {
                 "products": "podane produkty",
                 "onlyUserIngredients": true,
                 "caloriesRange": "od-do",
-                "dietType": "standardowa / sportowa",
+                "dietType": "standardowa / sportowa / dziecięca",
+                "kidsAge": "wiek dziecka w latach lub brak",
                 "gender": "mężczyzna / kobieta / dowolna",
                 "cookingTime": "czas w minutach",
                 "cookingSkillLevel": "1-5",
@@ -237,6 +252,20 @@ class MainProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setIsKids(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    isKids = value;
+    await prefs.setBool('isKids', isKids);
+    notifyListeners();
+  }
+
+  void setKidsAge(double value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    kidsAge = value;
+    await prefs.setDouble('kidsAge', kidsAge);
+    notifyListeners();
+  }
+
   void toggleMale() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     isMale = !isMale;
@@ -297,6 +326,8 @@ class MainProvider with ChangeNotifier {
       prefs.getDouble('caloriesRangeEnd') ?? 1000,
     );
     isRegularDiet = prefs.getBool('isRegularDiet') ?? true;
+    isKids = prefs.getBool('isKids') ?? false;
+    kidsAge = prefs.getDouble('kidsAge') ?? 3;
     timeForCooking = prefs.getDouble('timeForCooking') ?? 10;
     isVegan = prefs.getBool('isVegan') ?? false;
     notifyListeners();

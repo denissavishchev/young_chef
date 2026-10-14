@@ -42,16 +42,18 @@ class LanguageWidget extends StatelessWidget {
                 ? 'PL'
                 : 'RU',
           ),
-          onSelected: (value) {
-            data.setLanguage(value, context);
-
-            if (value.language.contains('English')) {
-              context.setLocale(const Locale('en', 'US'));
-            } else if (value.language.contains('Polski')) {
-              context.setLocale(const Locale('pl', 'PL'));
+          onSelected: (value) async {
+            final Locale locale;
+            if (value.language.contains('Polski')) {
+              locale = const Locale('pl', 'PL');
             } else if (value.language.contains('Russian')) {
-              context.setLocale(const Locale('ru', 'RU'));
+              locale = const Locale('ru', 'RU');
+            } else {
+              locale = const Locale('en', 'US');
             }
+            await context.setLocale(locale);
+            if (!context.mounted) return;
+            data.setLanguage(value, context);
           },
           itemBuilder: (context) {
             return languageList.map<PopupMenuEntry<AppLanguage>>((
