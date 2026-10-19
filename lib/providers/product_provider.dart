@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import '../constants.dart';
 import '../models/product_model.dart';
 
 /// State of the product screen: one product (typed, spoken or recognized from
@@ -111,7 +112,7 @@ class ProductProvider with ChangeNotifier {
   /// Takes a photo and puts the main product on it into the field. Returns
   /// false if nothing was recognized.
   Future<bool> scan(BuildContext context) async {
-    final language = Localizations.localeOf(context).languageCode;
+    final language = promptLanguage(context);
     final photo = await ImagePicker().pickImage(
       source: ImageSource.camera,
       maxWidth: 1280,
@@ -151,13 +152,15 @@ class ProductProvider with ChangeNotifier {
   Future<void> analyze(BuildContext context) async {
     final product = firstProduct;
     if (product.isEmpty || isLoading) return;
-    final language = Localizations.localeOf(context).languageCode;
+    final language = promptLanguage(context);
     isLoading = true;
     hasError = false;
     notifyListeners();
     try {
       final response = await _model.generateContent([
         Content.text('''
+LANGUAGE RULE (highest priority): write ALL text values of the JSON in $language, even if the product name is given in another language (translate it). JSON keys stay as in the structure.
+
 You are a food expert talking to a teenager. Describe this food product: "${controller.text}".
 If the text lists several products, or has no separators, describe ONLY the first product mentioned.
 
@@ -177,7 +180,7 @@ Answer ONLY with pure JSON (no markdown, no ```json, no text before/after) in th
   }
 }
 The per100g values are approximate, per 100 g of the raw/typical product.
-Answer in the language: $language.
+Every text value MUST be in $language.
 '''),
       ]);
       final cleaned = (response.text ?? '')

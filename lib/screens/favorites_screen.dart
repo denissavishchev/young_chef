@@ -88,8 +88,7 @@ class _FavoriteTile extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         final data = context.read<MainProvider>();
-        data.answer = recipe;
-        data.favoriteId = favorite.id;
+        data.openRecipe(recipe, id: favorite.id);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const RecipeScreen()),
@@ -143,8 +142,6 @@ class _FavoriteTile extends StatelessWidget {
                             label: '${recipe.cookingTime} ${'minUnit'.tr()}',
                             color: kLine,
                           ),
-                        if (recipe.isVegan)
-                          _Pill(label: 'vegan'.tr(), color: kLine),
                       ],
                     ),
                   ],

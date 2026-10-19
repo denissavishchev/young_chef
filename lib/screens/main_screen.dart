@@ -6,6 +6,7 @@ import '../../providers/main_provider.dart';
 import '../constants.dart';
 import '../widgets/cooking_loader.dart';
 import '../widgets/voice_dialog.dart';
+import 'recipe_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -279,6 +280,54 @@ class _MainScreenState extends State<MainScreen> {
                                       ),
                                     ),
                                   ),
+                                  if (data.hasCurrentRecipe)
+                                    GestureDetector(
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const RecipeScreen(),
+                                        ),
+                                      ),
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 14,
+                                        ),
+                                        decoration: outlineDecoration(
+                                          radius: 32,
+                                        ),
+                                        child: Row(
+                                          spacing: 10,
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'continueRecipe'.tr(),
+                                                    style: title,
+                                                  ),
+                                                  Text(
+                                                    data.answer.recipeName,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: muted,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            const Icon(
+                                              Icons.arrow_forward_rounded,
+                                              size: 24,
+                                              color: kLine,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   Container(
                                     width: double.infinity,
                                     padding: const EdgeInsets.fromLTRB(
@@ -404,12 +453,6 @@ class _MainScreenState extends State<MainScreen> {
                                               ),
                                             ),
                                           ),
-                                        _Chip(
-                                          label: 'isVegan'.tr(),
-                                          selected: data.isVegan,
-                                          onTap: () =>
-                                              data.setIsVegan(!data.isVegan),
-                                        ),
                                       ],
                                     ),
                                   ),

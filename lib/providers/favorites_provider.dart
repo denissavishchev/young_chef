@@ -21,6 +21,19 @@ class FavoriteRecipe {
 class FavoritesProvider extends ChangeNotifier {
   static const String boxName = 'favorites';
 
+  static String _docsPath = '';
+
+  /// Must be awaited before the app starts: the documents folder path changes
+  /// between installs on iOS, so photos are stored by file name only.
+  static Future<void> init() async {
+    _docsPath = (await getApplicationDocumentsDirectory()).path;
+  }
+
+  static String? _resolvePhoto(String? stored) {
+    if (stored == null) return null;
+    return '$_docsPath/favorites/${stored.split('/').last}';
+  }
+
   Box get _box => Hive.box(boxName);
 
   /// Newest first (keys are creation timestamps).
@@ -32,7 +45,9 @@ class FavoritesProvider extends ChangeNotifier {
         FavoriteRecipe(
           id: key,
           recipe: RecipeResponse.fromMap(_box.get(key) as Map),
-          photoPath: (_box.get(key) as Map)['photoPath'] as String?,
+          photoPath: _resolvePhoto(
+            (_box.get(key) as Map)['photoPath'] as String?,
+          ),
         ),
     ];
   }
@@ -40,12 +55,11 @@ class FavoritesProvider extends ChangeNotifier {
   /// Copies [photo] into the app's documents folder so it outlives the
   /// picker's temporary file.
   Future<String> _storePhoto(String id, XFile photo) async {
-    final dir = await getApplicationDocumentsDirectory();
-    final folder = Directory('${dir.path}/favorites');
+    final folder = Directory('$_docsPath/favorites');
     await folder.create(recursive: true);
     final file = File('${folder.path}/$id.jpg');
     await file.writeAsBytes(await photo.readAsBytes());
-    return file.path;
+    return file.uri.pathSegments.last;
   }
 
   Future<String> add(RecipeResponse recipe, {XFile? photo}) async {
@@ -58,7 +72,7 @@ class FavoritesProvider extends ChangeNotifier {
   }
 
   Future<void> remove(String id) async {
-    final path = (_box.get(id) as Map?)?['photoPath'] as String?;
+    final path = _resolvePhoto((_box.get(id) as Map?)?['photoPath'] as String?);
     await _box.delete(id);
     if (path != null) {
       final file = File(path);

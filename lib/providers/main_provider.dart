@@ -7,6 +7,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import '../constants.dart';
 import '../models/answer_model.dart';
 import '../screens/recipe_screen.dart';
 import '../widgets/language.dart';
@@ -38,6 +39,10 @@ class MainProvider with ChangeNotifier {
   /// Key of the current [answer] in the favorites box, null if not saved.
   String? favoriteId;
 
+  /// True when a recipe is stored (also across app restarts) that can be
+  /// continued from the main screen.
+  bool hasCurrentRecipe = false;
+
   String answerError = '';
 
   bool onlyUserIngredients = true;
@@ -49,7 +54,9 @@ class MainProvider with ChangeNotifier {
   bool isFemale = false;
   double timeForCooking = 10;
   double cookingSkillLevel = 1;
-  bool isVegan = false;
+  final Set<String> diets = {};
+
+  bool get isVegan => diets.contains('vegan');
 
   final aiModel = GenerativeModel(
     model: 'gemini-2.5-flash-lite',
@@ -59,11 +66,12 @@ class MainProvider with ChangeNotifier {
   Future<void> getRecipe(BuildContext context) async {
     isLoading = true;
     notifyListeners();
-    Locale myLocale = Localizations.localeOf(context);
-    String language = myLocale.languageCode;
+    final language = promptLanguage(context);
     final prompt = [
       Content.multi([
         TextPart('''
+          LANGUAGE RULE (highest priority): write EVERY text value of the JSON (recipeName, ingredients, instructions, units, developerInfo) in $language, no matter in which language the products below are given or this prompt is written. Translate the products' names if needed. JSON keys stay exactly as in the structure.
+
           Jesteś doświadczonym doradcą kulinarnym, który tworzy przepisy dla każdego.
 
             Na podstawie podanych produktów: ${questionController.text}
@@ -97,7 +105,7 @@ class MainProvider with ChangeNotifier {
             - Poziom umiejętności kulinarnych (skala 1–5, gdzie 1 = brak doświadczenia, tylko podstawowe czynności, 5 = zaawansowany, swobodne użycie noża, kuchenki i innych narzędzi): $cookingSkillLevel.
               Dostosuj złożoność technik kulinarnych i liczbę kroków do tego poziomu.
           
-            - Dieta wegańska: ${isVegan ? "Przepis MUSI być w 100% wegański — żadnych produktów pochodzenia zwierzęcego (mięso, ryby, nabiał, jajka, miód itp.)." : "Brak ograniczeń wegańskich."}
+            - Ograniczenia żywieniowe: ${diets.isEmpty ? "Brak ograniczeń żywieniowych." : "Przepis MUSI spełniać WSZYSTKIE poniższe wymagania:\n${diets.map((d) => '              * ${kDietPrompts[d]}').join('\n')}"}
           
             - Składniki, których NIE lubi/nie chce: ${notLikeController.text.isEmpty ? "Brak ograniczeń." : "NIE używaj w przepisie następujących składników: ${notLikeController.text}."}
           
@@ -107,7 +115,7 @@ class MainProvider with ChangeNotifier {
             - Jest zrozumiały, a jego trudność i złożoność technik kulinarnych są dopasowane do podanego poziomu umiejętności
             - Da się go przygotować w podanym limicie czasu, przy użyciu podstawowych narzędzi kuchennych
             - Jest zdrowy (zbalansowany, bez nadmiaru cukru, soli i tłuszczu)
-            - Spełnia wszystkie powyższe parametry (źródło składników, kaloryczność, typ diety, dieta wegańska, niechciane składniki, alergie)
+            - Spełnia wszystkie powyższe parametry (źródło składników, kaloryczność, typ diety, ograniczenia żywieniowe, niechciane składniki, alergie)
             - Pole "instructions" MUSI być tablicą stringów: każdy element to JEDEN osobny krok przygotowania.
             
             Odpowiedz WYŁĄCZNIE w formacie czystego JSON (bez markdown, bez ```json, bez żadnego tekstu przed/po), o następującej strukturze:
@@ -129,13 +137,13 @@ class MainProvider with ChangeNotifier {
                 "gender": "mężczyzna / kobieta / dowolna",
                 "cookingTime": "czas w minutach",
                 "cookingSkillLevel": "1-5",
-                "isVegan": false,
+                "isVegan": false (true tylko jeśli przepis jest w pełni wegański),
                 "dislikedIngredients": "lub brak",
                 "allergies": "lub brak"
               }
             }
           
-            Odpowiedz wyłącznie w języku: $language
+            Wszystkie wartości tekstowe (nazwa, składniki, kroki, jednostki, developerInfo) MUSZĄ być w języku: $language. Nie używaj polskiego, jeśli to nie jest ten język.
             Nie dodawaj żadnego tekstu poza samym obiektem JSON.
           '''),
       ]),
@@ -157,6 +165,7 @@ class MainProvider with ChangeNotifier {
           fallbackVegan: isVegan,
         );
         favoriteId = null;
+        await _saveCurrentRecipe();
         if (!context.mounted) return;
         Navigator.push(
           context,
@@ -182,7 +191,7 @@ class MainProvider with ChangeNotifier {
   /// Takes a photo, lets the model recognize the food products on it and
   /// appends them to the ingredients field. Returns false if nothing was added.
   Future<bool> scanIngredients(BuildContext context) async {
-    final language = Localizations.localeOf(context).languageCode;
+    final language = promptLanguage(context);
     final photo = await ImagePicker().pickImage(
       source: ImageSource.camera,
       maxWidth: 1280,
@@ -222,7 +231,27 @@ class MainProvider with ChangeNotifier {
 
   void setFavoriteId(String? id) {
     favoriteId = id;
+    _saveCurrentRecipe();
     notifyListeners();
+  }
+
+  /// Makes [recipe] the current one (e.g. opened from favorites).
+  void openRecipe(RecipeResponse recipe, {String? id}) {
+    answer = recipe;
+    favoriteId = id;
+    _saveCurrentRecipe();
+    notifyListeners();
+  }
+
+  Future<void> _saveCurrentRecipe() async {
+    hasCurrentRecipe = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('currentRecipe', jsonEncode(answer.toMap()));
+    if (favoriteId == null) {
+      await prefs.remove('currentFavoriteId');
+    } else {
+      await prefs.setString('currentFavoriteId', favoriteId!);
+    }
   }
 
   void setLanguage(AppLanguage value, context) {
@@ -306,10 +335,10 @@ class MainProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setIsVegan(bool? value) async {
+  void setDiet(String diet, bool value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    isVegan = value ?? false;
-    prefs.setBool('isVegan', isVegan);
+    value ? diets.add(diet) : diets.remove(diet);
+    await prefs.setStringList('diets', diets.toList());
     notifyListeners();
   }
 
@@ -329,7 +358,22 @@ class MainProvider with ChangeNotifier {
     isKids = prefs.getBool('isKids') ?? false;
     kidsAge = prefs.getDouble('kidsAge') ?? 3;
     timeForCooking = prefs.getDouble('timeForCooking') ?? 10;
-    isVegan = prefs.getBool('isVegan') ?? false;
+    final savedRecipe = prefs.getString('currentRecipe');
+    if (savedRecipe != null) {
+      try {
+        answer = RecipeResponse.fromMap(jsonDecode(savedRecipe) as Map);
+        favoriteId = prefs.getString('currentFavoriteId');
+        hasCurrentRecipe = answer.recipeName.isNotEmpty;
+      } catch (_) {
+        hasCurrentRecipe = false;
+      }
+    }
+    diets
+      ..clear()
+      ..addAll(
+        (prefs.getStringList('diets') ?? []).where(kDietPrompts.containsKey),
+      );
+    if (prefs.getBool('isVegan') == true) diets.add('vegan');
     notifyListeners();
   }
 

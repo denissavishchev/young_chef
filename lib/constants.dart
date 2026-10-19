@@ -95,3 +95,31 @@ final _gramUnit = RegExp(r'(?<=\d)\s*(g|gr|г)\b', caseSensitive: false);
 String localizeUnits(String value) => value
     .replaceAll(_kcalUnit, 'kcalUnit'.tr())
     .replaceAllMapped(_gramUnit, (_) => ' ${'gramUnit'.tr()}');
+
+/// Full English name of the app language, for model prompts (a bare code like
+/// "pl" is easily overridden by a prompt written in another language).
+String promptLanguage(BuildContext context) =>
+    switch (context.locale.languageCode) {
+      'pl' => 'Polish (polski)',
+      'ru' => 'Russian (русский)',
+      _ => 'English',
+    };
+
+/// Dietary restrictions the user can switch on in settings: id -> prompt rule.
+const kDietPrompts = <String, String>{
+  'vegan':
+      'Dieta wegańska: przepis w 100% wegański — żadnych produktów pochodzenia zwierzęcego (mięso, ryby, nabiał, jajka, miód itp.).',
+  'vegetarian':
+      'Dieta wegetariańska: bez mięsa, drobiu, ryb i owoców morza (nabiał i jajka są dozwolone).',
+  'glutenFree':
+      'Bez glutenu: żadnej pszenicy, żyta, jęczmienia, owsa niecertyfikowanego ani produktów je zawierających (zwykły makaron, chleb, mąka, bułka tarta, sos sojowy).',
+  'lactoseFree':
+      'Bez laktozy: żadnego mleka, śmietany, jogurtu, sera, masła ani innych produktów z laktozą (dozwolone zamienniki roślinne lub produkty bezlaktozowe).',
+  'sugarFree':
+      'Bez cukru: żadnego dodanego cukru, miodu, syropów ani słodzików cukrowych.',
+  'lowCarb':
+      'Niskowęglowodanowa / keto: minimum węglowodanów, bez makaronu, ryżu, ziemniaków, chleba i cukru.',
+  'halal': 'Halal: bez wieprzowiny, alkoholu i produktów niezgodnych z halal.',
+  'kosher':
+      'Koszerne: bez wieprzowiny i owoców morza, bez łączenia mięsa z nabiałem.',
+};

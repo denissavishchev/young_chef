@@ -44,6 +44,7 @@ void main() async {
   await Alarm.init();
   await Hive.initFlutter();
   await Hive.openBox(FavoritesProvider.boxName);
+  await FavoritesProvider.init();
   runApp(
     EasyLocalization(
       supportedLocales: const [

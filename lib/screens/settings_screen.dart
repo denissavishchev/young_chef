@@ -137,6 +137,26 @@ class SettingsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    Text('dietary'.tr().toUpperCase(), style: title),
+                    _Tile(
+                      child: Column(
+                        spacing: 12,
+                        children: [
+                          for (final diet in kDietPrompts.keys)
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text('diet_$diet'.tr(), style: text),
+                                ),
+                                _Toggle(
+                                  value: data.diets.contains(diet),
+                                  onChanged: (v) => data.setDiet(diet, v),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
                     Text('allergies'.tr().toUpperCase(), style: title),
                     _Tile(
                       child: _Field(
