@@ -33,7 +33,6 @@ class MainProvider with ChangeNotifier {
     protein: '',
     carbohydrates: '',
     fat: '',
-    developerInfo: '',
   );
 
   /// Key of the current [answer] in the favorites box, null if not saved.
@@ -63,63 +62,66 @@ class MainProvider with ChangeNotifier {
     apiKey: dotenv.env['GOOGLE_AI_STUDIO_KEY'].toString(),
   );
 
-  Future<void> getRecipe(BuildContext context) async {
-    isLoading = true;
-    notifyListeners();
-    final language = promptLanguage(context);
-    final prompt = [
-      Content.multi([
-        TextPart('''
-          LANGUAGE RULE (highest priority): write EVERY text value of the JSON (recipeName, ingredients, instructions, units, developerInfo) in $language, no matter in which language the products below are given or this prompt is written. Translate the products' names if needed. JSON keys stay exactly as in the structure.
+  String get _sourceRule => onlyUserIngredients
+      ? "Użyj WYŁĄCZNIE podanych produktów. Nie dodawaj żadnych innych składników, łącznie z solą, pieprzem czy oliwą, jeśli nie zostały wymienione."
+      : "Bazuj przede wszystkim na podanych produktach. Możesz dodać podstawowe składniki uzupełniające typu sól, pieprz, oliwa, przyprawy, jeśli są potrzebne — ale nie dodawaj nowych głównych składników (np. dodatkowego mięsa, nabiału czy warzyw, których nie ma na liście).";
 
-          Jesteś doświadczonym doradcą kulinarnym, który tworzy przepisy dla każdego.
+  String get _dietsRule => diets.isEmpty
+      ? "Brak ograniczeń żywieniowych."
+      : "Przepis MUSI spełniać WSZYSTKIE poniższe wymagania:\n${diets.map((d) => '              * ${kDietPrompts[d]}').join('\n')}";
+
+  String get _dislikedRule => notLikeController.text.isEmpty
+      ? "Brak ograniczeń."
+      : "NIE używaj w przepisie następujących składników: ${notLikeController.text}.";
+
+  String get _allergiesRule => allergiesController.text.isEmpty
+      ? "Brak alergii do uwzględnienia."
+      : "Osoba jest uczulona na: ${allergiesController.text}. Pod żadnym pozorem nie używaj tych składników ani produktów je zawierających, nawet jeśli zostały podane jako dostępne produkty.";
+
+  String _adultPrompt(String language) =>
+      '''
+          LANGUAGE RULE (highest priority): write EVERY text value of the JSON (recipeName, ingredients, instructions, units) in $language, no matter in which language the products below are given or this prompt is written. Translate the products' names if needed. JSON keys stay exactly as in the structure.
+
+          Jesteś doświadczonym doradcą kulinarnym, który tworzy przepisy dla dorosłych.
 
             Na podstawie podanych produktów: ${questionController.text}
-          
+
             WAŻNE — priorytet składników: Podane powyżej produkty (${questionController.text}) są PRIORYTETEM i podstawą przepisu. W razie jakiegokolwiek konfliktu między nimi a poniższymi parametrami (np. typem diety czy poziomem umiejętności), to one decydują o kierunku przepisu. Jedynym wyjątkiem są alergie — jeśli któryś z podanych produktów znajduje się na liście alergii, NIE używaj go, nawet jeśli został podany przez użytkownika.
-          
+
             Dodatkowe parametry, które MUSISZ uwzględnić:
-          
-            - Źródło składników: ${onlyUserIngredients ? "Użyj WYŁĄCZNIE podanych produktów. Nie dodawaj żadnych innych składników, łącznie z solą, pieprzem czy oliwą, jeśli nie zostały wymienione." : "Bazuj przede wszystkim na podanych produktach. Możesz dodać podstawowe składniki uzupełniające typu sól, pieprz, oliwa, przyprawy, jeśli są potrzebne — ale nie dodawaj nowych głównych składników (np. dodatkowego mięsa, nabiału czy warzyw, których nie ma na liście)."}
-          
+
+            - Źródło składników: $_sourceRule
+
             - Kaloryczność: Całe danie powinno mieścić się w zakresie od ${caloriesRange.start} do ${caloriesRange.end} kcal.
-          
+
             - Typ diety: ${isRegularDiet ? "Standardowa, zbalansowana dieta." : "Dieta dopasowana do potrzeb sportowca / dnia treningowego — uwzględnij odpowiednią podaż białka i węglowodanów wspierających regenerację i energię."}
-          
-            - Przepis dla dziecka: ${isKids ? """TAK — przepis jest przygotowywany dla dziecka w wieku ${kidsAge.toInt()} lat (skala 0–5 lat; 0 = niemowlę poniżej 1. roku życia). Ten punkt ma PIERWSZEŃSTWO nad typem diety, płcią, poziomem kalorii i dietą sportową — jeśli się z nimi kłócą, wygrywają zasady dla dziecka. Zasady:
-              * Dopasuj konsystencję i formę dania do wieku: 0 lat — wyłącznie gładkie purée lub bardzo miękkie, rozgniecione papki, bez kawałków; 1 rok — miękkie, drobno posiekane lub rozgniecione kawałki; 2–3 lata — małe, miękkie kawałki łatwe do gryzienia; 4–5 lat — normalne, ale pokrojone na małe kawałki, bez twardych elementów.
-              * Bezpieczeństwo: ZERO ryzyka zadławienia (żadnych całych orzechów, całych winogron, twardych surowych warzyw, popcornu, pestek, ości); bez soli, bez cukru, bez miodu (dla dzieci poniżej 1. roku życia miód jest zakazany), bez ostrych przypraw, bez surowych jaj, surowego mięsa i ryb, bez alkoholu i kofeiny.
-              * Odżywianie: łagodny smak, wartościowe składniki (żelazo, wapń, zdrowe tłuszcze, błonnik), porcja dopasowana do wieku dziecka (dużo mniejsza niż dla dorosłego). Pole kalorii i makroskładników podaj dla tej dziecięcej porcji, ignorując podany wyżej zakres kalorii.
-        * Metody obróbki: ZAKAZ smażenia (także na głębokim tłuszczu i na patelni) oraz pieczenia (piekarnik, grill, opiekanie, zapiekanie). Dozwolone wyłącznie gotowanie, gotowanie na parze, duszenie w wodzie/bulionie lub podanie na surowo (tylko produkty bezpieczne w takiej formie, np. dojrzały owoc w formie purée).
-                    * Adresat instrukcji: przepis przygotowuje RODZIC lub opiekun, nie dziecko. Pisz kroki bezpośrednio do rodzica (np. "Ugotuj...", "Rozgnieć...") i NIE dodawaj uwag w stylu "to robi dorosły" ani "dziecko może pomóc". Na końcu dodaj krok, by potrawę ostudzić i sprawdzić jej temperaturę przed podaniem dziecku.
-              * Nazwa przepisu (pole "recipeName") MUSI być bajkowa i zabawna, z nawiązaniem do postaci z bajek, np. "Zupka Kubusia Puchatka", "Marchewkowe puree Krecika", "Magiczna owsianka Elsy", "Papka Świnki Peppy". Wybierz bohatera bajkowego pasującego do głównego składnika i dostosowanego do wieku dziecka, nazwa ma być krótka i radosna.""" : "NIE — przepis nie jest przeznaczony dla dziecka."}
 
             - Płeć osoby, dla której przygotowywany jest przepis: ${isMale == isFemale
-            ? "nieokreślona / dowolna — nie uwzględniaj płci, przepis ma być odpowiedni zarówno dla kobiet, jak i mężczyzn."
-            : isMale
-            ? "mężczyzna (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)."
-            : "kobieta (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)."}
-          
+          ? "nieokreślona / dowolna — nie uwzględniaj płci, przepis ma być odpowiedni zarówno dla kobiet, jak i mężczyzn."
+          : isMale
+          ? "mężczyzna (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)."
+          : "kobieta (dostosuj orientacyjne potrzeby kaloryczne/makroskładnikowe, jeśli ma to znaczenie)."}
+
             - Czas przygotowania: Przepis musi być możliwy do wykonania w maksymalnie $timeForCooking minut.
-          
+
             - Poziom umiejętności kulinarnych (skala 1–5, gdzie 1 = brak doświadczenia, tylko podstawowe czynności, 5 = zaawansowany, swobodne użycie noża, kuchenki i innych narzędzi): $cookingSkillLevel.
               Dostosuj złożoność technik kulinarnych i liczbę kroków do tego poziomu.
-          
-            - Ograniczenia żywieniowe: ${diets.isEmpty ? "Brak ograniczeń żywieniowych." : "Przepis MUSI spełniać WSZYSTKIE poniższe wymagania:\n${diets.map((d) => '              * ${kDietPrompts[d]}').join('\n')}"}
-          
-            - Składniki, których NIE lubi/nie chce: ${notLikeController.text.isEmpty ? "Brak ograniczeń." : "NIE używaj w przepisie następujących składników: ${notLikeController.text}."}
-          
-            - Alergie: ${allergiesController.text.isEmpty ? "Brak alergii do uwzględnienia." : "Osoba jest uczulona na: ${allergiesController.text}. Pod żadnym pozorem nie używaj tych składników ani produktów je zawierających, nawet jeśli zostały podane jako dostępne produkty."}
-          
+
+            - Ograniczenia żywieniowe: $_dietsRule
+
+            - Składniki, których NIE lubi/nie chce: $_dislikedRule
+
+            - Alergie: $_allergiesRule
+
             Wygeneruj jeden przepis kulinarny, który spełnia następujące wymagania:
             - Jest zrozumiały, a jego trudność i złożoność technik kulinarnych są dopasowane do podanego poziomu umiejętności
             - Da się go przygotować w podanym limicie czasu, przy użyciu podstawowych narzędzi kuchennych
             - Jest zdrowy (zbalansowany, bez nadmiaru cukru, soli i tłuszczu)
             - Spełnia wszystkie powyższe parametry (źródło składników, kaloryczność, typ diety, ograniczenia żywieniowe, niechciane składniki, alergie)
             - Pole "instructions" MUSI być tablicą stringów: każdy element to JEDEN osobny krok przygotowania.
-            
+
             Odpowiedz WYŁĄCZNIE w formacie czystego JSON (bez markdown, bez ```json, bez żadnego tekstu przed/po), o następującej strukturze:
-          
+
             {
               "recipeName": "Nazwa przepisu",
               "ingredients": ["składnik 1 z ilością", "składnik 2 z ilością"],
@@ -128,24 +130,74 @@ class MainProvider with ChangeNotifier {
               "protein": "ilość białka w gramach (tylko liczba + jednostka, bez słów typu 'około' i bez znaku ~)",
               "carbohydrates": "ilość węglowodanów w gramach (tylko liczba + jednostka, bez słów typu 'około' i bez znaku ~)",
               "fat": "ilość tłuszczu w gramach (tylko liczba + jednostka, bez słów typu 'około' i bez znaku ~)",
-              "developerInfo": {
-                "products": "podane produkty",
-                "onlyUserIngredients": true,
-                "caloriesRange": "od-do",
-                "dietType": "standardowa / sportowa / dziecięca",
-                "kidsAge": "wiek dziecka w latach lub brak",
-                "gender": "mężczyzna / kobieta / dowolna",
-                "cookingTime": "czas w minutach",
-                "cookingSkillLevel": "1-5",
-                "isVegan": false (true tylko jeśli przepis jest w pełni wegański),
-                "dislikedIngredients": "lub brak",
-                "allergies": "lub brak"
-              }
+              "isVegan": false (true tylko jeśli przepis jest w pełni wegański)
             }
-          
-            Wszystkie wartości tekstowe (nazwa, składniki, kroki, jednostki, developerInfo) MUSZĄ być w języku: $language. Nie używaj polskiego, jeśli to nie jest ten język.
+
+            Wszystkie wartości tekstowe (nazwa, składniki, kroki, jednostki) MUSZĄ być w języku: $language. Nie używaj polskiego, jeśli to nie jest ten język.
             Nie dodawaj żadnego tekstu poza samym obiektem JSON.
-          '''),
+          ''';
+
+  String _kidsPrompt(String language) =>
+      '''
+          LANGUAGE RULE (highest priority): write EVERY text value of the JSON (recipeName, ingredients, instructions, units) in $language, no matter in which language the products below are given or this prompt is written. Translate the products' names if needed. JSON keys stay exactly as in the structure.
+
+          Jesteś doświadczonym dietetykiem dziecięcym i doradcą kulinarnym, który tworzy bezpieczne przepisy dla dzieci.
+
+            Na podstawie podanych produktów: ${questionController.text}
+
+            Przepis jest przygotowywany dla dziecka w wieku ${kidsAge.toInt()} lat (skala 0–5 lat; 0 = niemowlę poniżej 1. roku życia).
+
+            WAŻNE — priorytet składników: Podane powyżej produkty (${questionController.text}) są podstawą przepisu. Jedynym wyjątkiem są alergie i zasady bezpieczeństwa dla dziecka — jeśli któryś z podanych produktów jest na liście alergii lub jest niebezpieczny dla dziecka w tym wieku, NIE używaj go.
+
+            Zasady dla dziecka (mają pierwszeństwo nad wszystkim innym):
+              * Dopasuj konsystencję i formę dania do wieku: 0 lat — wyłącznie gładkie purée lub bardzo miękkie, rozgniecione papki, bez kawałków; 1 rok — miękkie, drobno posiekane lub rozgniecione kawałki; 2–3 lata — małe, miękkie kawałki łatwe do gryzienia; 4–5 lat — normalne, ale pokrojone na małe kawałki, bez twardych elementów.
+              * Bezpieczeństwo: ZERO ryzyka zadławienia (żadnych całych orzechów, całych winogron, twardych surowych warzyw, popcornu, pestek, ości); bez soli, bez cukru, bez miodu (dla dzieci poniżej 1. roku życia miód jest zakazany), bez ostrych przypraw, bez surowych jaj, surowego mięsa i ryb, bez alkoholu i kofeiny.
+              * Odżywianie: łagodny smak, wartościowe składniki (żelazo, wapń, zdrowe tłuszcze, błonnik), porcja dopasowana do wieku dziecka (dużo mniejsza niż dla dorosłego). Pola kalorii i makroskładników podaj dla tej dziecięcej porcji.
+              * Metody obróbki: ZAKAZ smażenia (także na głębokim tłuszczu i na patelni) oraz pieczenia (piekarnik, grill, opiekanie, zapiekanie). Dozwolone wyłącznie gotowanie, gotowanie na parze, duszenie w wodzie/bulionie lub podanie na surowo (tylko produkty bezpieczne w takiej formie, np. dojrzały owoc w formie purée).
+              * Adresat instrukcji: przepis przygotowuje RODZIC lub opiekun, nie dziecko. Pisz kroki bezpośrednio do rodzica (np. "Ugotuj...", "Rozgnieć...") i NIE dodawaj uwag w stylu "to robi dorosły" ani "dziecko może pomóc". Na końcu dodaj krok, by potrawę ostudzić i sprawdzić jej temperaturę przed podaniem dziecku.
+              * Nazwa przepisu (pole "recipeName") MUSI być bajkowa i zabawna, z nawiązaniem do postaci z bajek, np. "Zupka Kubusia Puchatka", "Marchewkowe puree Krecika", "Magiczna owsianka Elsy", "Papka Świnki Peppy". Wybierz bohatera bajkowego pasującego do głównego składnika i dostosowanego do wieku dziecka, nazwa ma być krótka i radosna.
+
+            Dodatkowe parametry, które MUSISZ uwzględnić:
+
+            - Źródło składników: $_sourceRule
+
+            - Czas przygotowania: Przepis musi być możliwy do wykonania w maksymalnie $timeForCooking minut.
+
+            - Poziom umiejętności kulinarnych rodzica (skala 1–5, gdzie 1 = brak doświadczenia, 5 = zaawansowany): $cookingSkillLevel.
+              Dostosuj złożoność technik kulinarnych i liczbę kroków do tego poziomu.
+
+            - Ograniczenia żywieniowe: $_dietsRule
+
+            - Składniki, których dziecko NIE lubi/nie chce: $_dislikedRule
+
+            - Alergie: $_allergiesRule
+
+            Pole "instructions" MUSI być tablicą stringów: każdy element to JEDEN osobny krok przygotowania.
+
+            Odpowiedz WYŁĄCZNIE w formacie czystego JSON (bez markdown, bez ```json, bez żadnego tekstu przed/po), o następującej strukturze:
+
+            {
+              "recipeName": "Bajkowa nazwa przepisu",
+              "ingredients": ["składnik 1 z ilością", "składnik 2 z ilością"],
+              "instructions": ["krok 1", "krok 2"],
+              "calories": "Wartość kaloryczna dziecięcej porcji w kcal (tylko liczba + jednostka)",
+              "protein": "ilość białka w gramach (tylko liczba + jednostka, bez słów typu 'około' i bez znaku ~)",
+              "carbohydrates": "ilość węglowodanów w gramach (tylko liczba + jednostka, bez słów typu 'około' i bez znaku ~)",
+              "fat": "ilość tłuszczu w gramach (tylko liczba + jednostka, bez słów typu 'około' i bez znaku ~)",
+              "isVegan": false (true tylko jeśli przepis jest w pełni wegański)
+            }
+
+            Wszystkie wartości tekstowe (nazwa, składniki, kroki, jednostki) MUSZĄ być w języku: $language. Nie używaj polskiego, jeśli to nie jest ten język.
+            Nie dodawaj żadnego tekstu poza samym obiektem JSON.
+          ''';
+
+  Future<void> getRecipe(BuildContext context) async {
+    isLoading = true;
+    notifyListeners();
+    final language = promptLanguage(context);
+    final prompt = [
+      Content.multi([
+        TextPart(isKids ? _kidsPrompt(language) : _adultPrompt(language)),
       ]),
     ];
     try {

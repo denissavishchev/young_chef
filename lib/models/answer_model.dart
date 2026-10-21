@@ -6,7 +6,6 @@ class RecipeResponse {
   final String protein;
   final String carbohydrates;
   final String fat;
-  final String developerInfo;
   final int cookingTime;
   final bool isVegan;
 
@@ -18,24 +17,20 @@ class RecipeResponse {
     required this.protein,
     required this.carbohydrates,
     required this.fat,
-    required this.developerInfo,
     this.cookingTime = 0,
     this.isVegan = false,
   });
 
-  /// [fallbackTime] and [fallbackVegan] are used when the model's
-  /// `developerInfo` does not carry usable values.
+  /// [fallbackTime] is the cooking time requested by the user;
+  /// [fallbackVegan] is used when the model does not return `isVegan`.
   factory RecipeResponse.fromJson(
     Map<String, dynamic> json, {
     int fallbackTime = 0,
     bool fallbackVegan = false,
   }) {
-    final info = json['developerInfo'];
-    final infoMap = info is Map ? info : const {};
-    final timeMatch = RegExp(r'\d+').firstMatch('${infoMap['cookingTime']}');
-    final vegan = infoMap['isVegan'];
+    final vegan = json['isVegan'];
     return RecipeResponse(
-      cookingTime: int.tryParse(timeMatch?.group(0) ?? '') ?? fallbackTime,
+      cookingTime: fallbackTime,
       isVegan: vegan is bool ? vegan : fallbackVegan,
       recipeName: json['recipeName'] ?? '',
       ingredients: List<String>.from(json['ingredients'] ?? []),
@@ -44,7 +39,6 @@ class RecipeResponse {
       protein: json['protein']?.toString() ?? '',
       carbohydrates: json['carbohydrates']?.toString() ?? '',
       fat: json['fat']?.toString() ?? '',
-      developerInfo: json['developerInfo']?.toString() ?? '',
     );
   }
 
@@ -56,7 +50,6 @@ class RecipeResponse {
     'protein': protein,
     'carbohydrates': carbohydrates,
     'fat': fat,
-    'developerInfo': developerInfo,
     'cookingTime': cookingTime,
     'isVegan': isVegan,
   };
@@ -70,7 +63,6 @@ class RecipeResponse {
       protein: map['protein'] as String? ?? '',
       carbohydrates: map['carbohydrates'] as String? ?? '',
       fat: map['fat'] as String? ?? '',
-      developerInfo: map['developerInfo'] as String? ?? '',
       cookingTime: map['cookingTime'] as int? ?? 0,
       isVegan: map['isVegan'] as bool? ?? false,
     );
