@@ -123,3 +123,30 @@ const kDietPrompts = <String, String>{
   'kosher':
       'Koszerne: bez wieprzowiny i owoców morza, bez łączenia mięsa z nabiałem.',
 };
+
+/// Meal types the user can pick: id -> prompt rule (what the meal consists of).
+const kMealPrompts = <String, String>{
+  'dish':
+      'Danie: dowolne danie, niezwiązane z porą dnia — dobierz je do podanych produktów.',
+  'breakfast':
+      'Śniadanie: lekki, energetyczny posiłek poranny (np. jajka, owsianka, naleśniki, kanapki, jogurt z owocami).',
+  'lunch':
+      'Obiad: główny, sycący posiłek dnia (np. zupa lub danie główne z mięsa, ryby albo warzyw z dodatkiem ryżu, makaronu lub ziemniaków).',
+  'dinner':
+      'Kolacja: lekki, łatwo strawny posiłek wieczorny (np. sałatka, kanapki, ciepłe warzywa, lekka zupa).',
+  'snack':
+      'Przekąska: mała porcja między posiłkami (np. owoce, słupki warzyw, hummus, małe kanapki, kulki mocy).',
+  'dessert':
+      'Deser: słodki akcent po posiłku (np. deser owocowy, budyń, mus, naleśniki, pieczone owoce), bez nadmiaru cukru.',
+};
+
+/// Dish types available when the meal type is plain "dish": id -> prompt rule.
+const kDishTypePrompts = <String, String>{
+  'soup': 'Typ dania: zupa (płynne danie podawane na ciepło lub zimno).',
+  'salad': 'Typ dania: sałatka.',
+  'main': 'Typ dania: danie główne (mięso, ryba lub warzywa z dodatkiem).',
+  'pasta': 'Typ dania: danie na bazie makaronu.',
+  'sandwich': 'Typ dania: kanapka lub wrap.',
+  'smoothie': 'Typ dania: koktajl / smoothie do wypicia.',
+  'bowl': 'Typ dania: miska (bowl) — baza zbożowa lub warzywna z dodatkami.',
+};

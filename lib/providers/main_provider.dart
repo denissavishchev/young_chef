@@ -54,6 +54,10 @@ class MainProvider with ChangeNotifier {
   double timeForCooking = 10;
   double cookingSkillLevel = 1;
   final Set<String> diets = {};
+  String mealType = 'dish';
+
+  /// Chosen only when [mealType] is 'dish'; null means any dish.
+  String? dishType;
 
   bool get isVegan => diets.contains('vegan');
 
@@ -65,6 +69,13 @@ class MainProvider with ChangeNotifier {
   String get _sourceRule => onlyUserIngredients
       ? "Użyj WYŁĄCZNIE podanych produktów. Nie dodawaj żadnych innych składników, łącznie z solą, pieprzem czy oliwą, jeśli nie zostały wymienione."
       : "Bazuj przede wszystkim na podanych produktach. Możesz dodać podstawowe składniki uzupełniające typu sól, pieprz, oliwa, przyprawy, jeśli są potrzebne — ale nie dodawaj nowych głównych składników (np. dodatkowego mięsa, nabiału czy warzyw, których nie ma na liście).";
+
+  String get _mealRule {
+    final dish = mealType == 'dish' && dishType != null
+        ? '\n              ${kDishTypePrompts[dishType]}'
+        : '';
+    return '${kMealPrompts[mealType]}$dish';
+  }
 
   String get _dietsRule => diets.isEmpty
       ? "Brak ograniczeń żywieniowych."
@@ -91,6 +102,8 @@ class MainProvider with ChangeNotifier {
             Dodatkowe parametry, które MUSISZ uwzględnić:
 
             - Źródło składników: $_sourceRule
+
+            - Rodzaj posiłku: $_mealRule
 
             - Kaloryczność: Całe danie powinno mieścić się w zakresie od ${caloriesRange.start} do ${caloriesRange.end} kcal.
 
@@ -160,6 +173,8 @@ class MainProvider with ChangeNotifier {
             Dodatkowe parametry, które MUSISZ uwzględnić:
 
             - Źródło składników: $_sourceRule
+
+            - Rodzaj posiłku (dla dziecka): $_mealRule Dostosuj go do zasad dla dziecka powyżej — one mają pierwszeństwo (np. deser bez cukru i miodu, oparty na owocach; zakaz pieczenia i smażenia obowiązuje także tutaj; koktajl tylko gładki, dla dzieci od 1. roku życia).
 
             - Czas przygotowania: Przepis musi być możliwy do wykonania w maksymalnie $timeForCooking minut.
 
@@ -387,6 +402,27 @@ class MainProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setMealType(String value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    mealType = value;
+    if (value != 'dish') dishType = null;
+    await prefs.setString('mealType', mealType);
+    await prefs.remove('dishType');
+    notifyListeners();
+  }
+
+  /// Tapping the selected dish type again clears it (any dish).
+  void setDishType(String value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    dishType = dishType == value ? null : value;
+    if (dishType == null) {
+      await prefs.remove('dishType');
+    } else {
+      await prefs.setString('dishType', dishType!);
+    }
+    notifyListeners();
+  }
+
   void setDiet(String diet, bool value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     value ? diets.add(diet) : diets.remove(diet);
@@ -410,6 +446,12 @@ class MainProvider with ChangeNotifier {
     isKids = prefs.getBool('isKids') ?? false;
     kidsAge = prefs.getDouble('kidsAge') ?? 3;
     timeForCooking = prefs.getDouble('timeForCooking') ?? 10;
+    final savedMeal = prefs.getString('mealType');
+    mealType = kMealPrompts.containsKey(savedMeal) ? savedMeal! : 'dish';
+    final savedDish = prefs.getString('dishType');
+    dishType = mealType == 'dish' && kDishTypePrompts.containsKey(savedDish)
+        ? savedDish
+        : null;
     final savedRecipe = prefs.getString('currentRecipe');
     if (savedRecipe != null) {
       try {

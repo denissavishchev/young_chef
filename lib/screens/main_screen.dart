@@ -397,6 +397,49 @@ class _MainScreenState extends State<MainScreen> {
                                           ),
                                         ),
                                         Text(
+                                          'mealTypeLabel'.tr(),
+                                          style: muted,
+                                        ),
+                                        Wrap(
+                                          spacing: 10,
+                                          runSpacing: 10,
+                                          children: [
+                                            for (final meal
+                                                in kMealPrompts.keys)
+                                              _Chip(
+                                                label: 'meal_$meal'.tr(),
+                                                selected: data.mealType == meal,
+                                                onTap: () =>
+                                                    data.setMealType(meal),
+                                              ),
+                                          ],
+                                        ),
+                                        Text(
+                                          'mealDesc_${data.mealType}'.tr(),
+                                          style: muted,
+                                        ),
+                                        if (data.mealType == 'dish') ...[
+                                          Text(
+                                            'dishTypeLabel'.tr(),
+                                            style: muted,
+                                          ),
+                                          Wrap(
+                                            spacing: 10,
+                                            runSpacing: 10,
+                                            children: [
+                                              for (final dish
+                                                  in kDishTypePrompts.keys)
+                                                _Chip(
+                                                  label: 'dish_$dish'.tr(),
+                                                  selected:
+                                                      data.dishType == dish,
+                                                  onTap: () =>
+                                                      data.setDishType(dish),
+                                                ),
+                                            ],
+                                          ),
+                                        ],
+                                        Text(
                                           'dietTypeLabel'.tr(),
                                           style: muted,
                                         ),
