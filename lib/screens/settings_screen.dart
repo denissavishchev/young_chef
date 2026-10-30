@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import '../../providers/main_provider.dart';
 import '../constants.dart';
@@ -171,6 +172,7 @@ class SettingsScreen extends StatelessWidget {
                         onChanged: data.setNotLikes,
                       ),
                     ),
+                    const _VersionInfo(),
                   ],
                 ),
               ),
@@ -193,6 +195,34 @@ class _Tile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: outlineDecoration(),
       child: child,
+    );
+  }
+}
+
+/// App version and release date at the bottom of settings.
+class _VersionInfo extends StatelessWidget {
+  const _VersionInfo();
+
+  @override
+  Widget build(BuildContext context) {
+    final style = kTextStyle.copyWith(
+      color: kLine.withValues(alpha: 0.5),
+      fontSize: 12,
+    );
+    final date = DateFormat('yyyy.MM.dd').format(kReleaseDate);
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        final info = snapshot.data;
+        final version = info == null
+            ? ''
+            : '${info.version} (${info.buildNumber})';
+        return Text(
+          '${'appVersion'.tr(args: [version])} · $date',
+          textAlign: TextAlign.center,
+          style: style,
+        );
+      },
     );
   }
 }

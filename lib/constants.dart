@@ -105,6 +105,10 @@ String promptLanguage(BuildContext context) =>
       _ => 'English',
     };
 
+/// Release date shown under the version in settings (iOS and Android).
+/// Update together with `version:` in pubspec.yaml.
+final kReleaseDate = DateTime(2026, 10, 30);
+
 /// Dietary restrictions the user can switch on in settings: id -> prompt rule.
 const kDietPrompts = <String, String>{
   'vegan':

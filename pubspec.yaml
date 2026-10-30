@@ -3,7 +3,7 @@ description: "Everyday Chef"
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.1+2
+version: 1.2.0+3
 
 environment:
   sdk: ^3.10.9
@@ -31,6 +31,7 @@ dependencies:
   hive_ce_flutter: ^2.4.0
   image_picker: ^1.2.4
   path_provider: ^2.1.5
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:

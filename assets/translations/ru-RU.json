@@ -53,6 +53,7 @@
   "continueRecipe": "Продолжить текущий рецепт",
   "allergies": "Аллергии",
   "notLike": "Не нравится",
+  "appVersion": "Версия {}",
   "thisFieldCannotBeEmpty": "Это поле не может быть пустым",
   "tryAgainSoon": "Попробуйте снова чуть позже.",
   "instructions": "Инструкции",

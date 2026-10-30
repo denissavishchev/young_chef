@@ -53,6 +53,7 @@
   "continueRecipe": "Continue current recipe",
   "allergies": "Allergies",
   "notLike": "Don't like",
+  "appVersion": "Version {}",
   "thisFieldCannotBeEmpty": "This field cannot be empty",
   "tryAgainSoon": "Please try again in a moment.",
   "instructions": "Instructions",
